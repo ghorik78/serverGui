@@ -1,0 +1,2 @@
+teamList = []
+playerList = []
