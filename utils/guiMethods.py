@@ -1,5 +1,5 @@
 from PyQt5 import Qt, QtCore
-from PyQt5.QtWidgets import QMenu, QAction
+from PyQt5.QtWidgets import QMenu, QAction, QTreeWidgetItem, QTreeWidget
 
 
 def callTreeContextMenu(label: str, parent, pos):
@@ -7,3 +7,4 @@ def callTreeContextMenu(label: str, parent, pos):
     menu = QMenu(parent)
     menu.addAction(action)
     return menu, action
+

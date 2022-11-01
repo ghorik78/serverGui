@@ -15,15 +15,16 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi('uiFiles/gui.ui', self)
 
         self.addContextMenus()
-        self.fillItemLists()
+        #self.fillItemLists()
 
         self.teamTree = self.findChild(QTreeWidget, 'teamTree')  # list of teams
-        self.teamTree.itemClicked.connect(self.showItemContextMenu)
+        self.teamTree.itemClicked.connect(self.itemClickTrigger)
 
         self.playerTree = self.findChild(QTreeWidget, 'playerTree')  # list of players
-        self.playerTree.itemClicked.connect(self.showItemContextMenu)
+        self.playerTree.itemClicked.connect(self.itemClickTrigger)
 
         self.test = QTreeWidget()
+        self.currentIndex = 0
 
     def addContextMenus(self):
         self.teamTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -54,6 +55,9 @@ class MainWindow(QtWidgets.QMainWindow):
         newTeam.setText(0, 'New team')
 
         self.teamTree.addTopLevelItems([newTeam])
+        #teamList.append(newTeam)
+        #playerList.append([])
+        #print(playerList)
 
     def createNewPlayer(self):
         newPlayer = QTreeWidgetItem()
@@ -89,9 +93,12 @@ class MainWindow(QtWidgets.QMainWindow):
         newPlayer.setText(0, 'New player')
 
         self.playerTree.addTopLevelItems([newPlayer])
+        #playerList[self.currentIndex].append(newPlayer)
 
-    @staticmethod
-    def showItemContextMenu(item, col):
+    def itemClickTrigger(self, item, col):
+        #self.currentIndex = self.teamTree.indexOfTopLevelItem(item)
+        #self.playerTree.addTopLevelItems(playerList[self.currentIndex])
+
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if (col == 0) and item.childCount() \
             else item.setFlags(DEFAULT_ITEM_FLAGS)
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if col == 1 | item.childCount() \

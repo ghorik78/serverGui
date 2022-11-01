@@ -1,2 +1,2 @@
 teamList = []
-playerList = []
+playerList = []  # first index -> team index from zero, second index -> player index from zero
