@@ -1,48 +1,45 @@
 {
+  "game": {
     "teams": [
-        {
-            "players": [
-                {
-                    "name_player": "",
-                    "control_obj": "EduBotObject",
-                    "role_obj": "RoboFinist_Role",
-                    "method_control_obj": "",
-                    "ip": "",
-                    "port": ""
-                }
-            ],
-            "name_team": "",
-            "color_team": [
-                0,
-                0,
-                0
-            ]
-        },
-        {
-            "players": [
-                {
-                    "name_player": "",
-                    "control_obj": "EduBotObject",
-                    "role_obj": "RoboFinist_Role",
-                    "method_control_obj": "",
-                    "ip": "",
-                    "port": ""
-                },
-                {
-                    "name_player": "",
-                    "control_obj": "PioneerObject",
-                    "role_obj": "RoboFinist_Role",
-                    "method_control_obj": "",
-                    "ip": "12.12.12",
-                    "port": ""
-                }
-            ],
-            "name_team": "",
-            "color_team": [
-                0,
-                0,
-                0
-            ]
-        }
+      {
+        "players": [
+          {
+            "name_player": "Boomer",
+            "control_obj": "PioneerObject",
+            "role_obj": "RoboFinist_Role",
+            "method_control_obj": "",
+            "ip": "12",
+            "port": "13"
+          }
+        ],
+        "name_team": "",
+        "color_team": [
+          12,
+          12,
+          12
+        ]
+      }
     ]
+  },
+  "polygon": {
+    "objects": [
+      {
+        "role": "Fabric_RolePolygon",
+        "position": [
+          123,
+          312,
+          12
+        ],
+        "ind_for_led_controller": "1",
+        "custom_settings": "1",
+        "game_mechanics": "1",
+        "filter": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ]
+  }
 }

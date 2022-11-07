@@ -24,3 +24,24 @@ class TeamParams:
 @dataclasses.dataclass
 class Game:
     teams: typing.List[TeamParams]
+
+
+@dataclasses.dataclass
+class ObjectParams:
+    role: str = "role not set"
+    position: list = (0, 0, 0)
+    ind_for_led_controller: int = 0
+    custom_settings: str = ""
+    game_mechanics: int = 0
+    filter: list = (0, 0)
+
+
+@dataclasses.dataclass
+class PolygonParams:
+    objects: typing.List[ObjectParams]
+
+
+@dataclasses.dataclass
+class Config:
+    game: Game
+    polygon: PolygonParams

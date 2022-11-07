@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>806</width>
-    <height>513</height>
+    <width>840</width>
+    <height>560</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="widget">
      <attribute name="title">
@@ -56,6 +56,12 @@
         <width>561</width>
         <height>411</height>
        </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
       <property name="styleSheet">
        <string notr="true">QGraphicsView {
@@ -94,7 +100,7 @@
       </property>
       <column>
        <property name="text">
-        <string>Team List</string>
+        <string>Team list</string>
        </property>
       </column>
       <column>
@@ -121,6 +127,59 @@
      <attribute name="title">
       <string>Polygon creating</string>
      </attribute>
+     <widget class="QGraphicsView" name="graphicsView_4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>791</width>
+        <height>411</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QGraphicsView {
+	background-color: #BBBBBB
+}</string>
+      </property>
+     </widget>
+     <widget class="QTreeWidget" name="objectTree">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>771</width>
+        <height>391</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>771</width>
+        <height>391</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>771</width>
+        <height>391</height>
+       </size>
+      </property>
+      <column>
+       <property name="text">
+        <string>Object</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Value</string>
+       </property>
+      </column>
+     </widget>
     </widget>
    </widget>
   </widget>
