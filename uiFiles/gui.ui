@@ -14,8 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">
-</string>
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="TabView">
@@ -83,81 +82,6 @@
         <string>Value</string>
        </property>
       </column>
-      <item>
-       <property name="text">
-        <string>Player 1</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Control object</string>
-        </property>
-        <property name="text">
-         <string>Test</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Ip</string>
-        </property>
-        <property name="text">
-         <string>12.12.12</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Port</string>
-        </property>
-        <property name="text">
-         <string>5123</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Role object</string>
-        </property>
-        <property name="text">
-         <string>copter</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Player name</string>
-        </property>
-        <property name="text">
-         <string>tester</string>
-        </property>
-       </item>
-      </item>
-      <item>
-       <property name="text">
-        <string>Player 2</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Control object</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Ip</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Port</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Role object</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Player name</string>
-        </property>
-       </item>
-      </item>
      </widget>
      <widget class="QTreeWidget" name="teamTree">
       <property name="geometry">
@@ -178,42 +102,6 @@
         <string>Value</string>
        </property>
       </column>
-      <item>
-       <property name="text">
-        <string>Team 1</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Color</string>
-        </property>
-        <property name="text">
-         <string>green</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Name</string>
-        </property>
-        <property name="text">
-         <string>cats</string>
-        </property>
-       </item>
-      </item>
-      <item>
-       <property name="text">
-        <string>Team 2</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Color</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Name</string>
-        </property>
-       </item>
-      </item>
      </widget>
      <widget class="QPushButton" name="createJsonButton">
       <property name="geometry">
@@ -229,7 +117,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="widget">
      <attribute name="title">
       <string>Polygon creating</string>
      </attribute>

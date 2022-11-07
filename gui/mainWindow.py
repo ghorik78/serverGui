@@ -15,7 +15,6 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi('uiFiles/gui.ui', self)
 
         self.addContextMenus()
-        #self.fillItemLists()
 
         self.teamTree = self.findChild(QTreeWidget, 'teamTree')  # list of teams
         self.teamTree.itemClicked.connect(self.itemClickTrigger)
@@ -24,7 +23,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.playerTree.itemClicked.connect(self.itemClickTrigger)
 
         self.test = QTreeWidget()
-        self.currentIndex = 0
+        self.currentTeamIndex = 0
 
     def addContextMenus(self):
         self.teamTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -34,12 +33,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.playerTree.customContextMenuRequested.connect(self.showPlayerTreeContextMenu)
 
     def showTeamTreeContextMenu(self, position):
-        menu, action = callTreeContextMenu('Create new team', self.teamTree, position)
+        menu, action = callTreeContextMenu('Create new team', self.playerTree)
         action.triggered.connect(self.createNewTeam)
         menu.exec_(self.teamTree.mapToGlobal(position))
 
     def showPlayerTreeContextMenu(self, position):
-        menu, action = callTreeContextMenu('Create new player', self.playerTree, position)
+        menu, action = callTreeContextMenu('Create new player', self.playerTree)
         action.triggered.connect(self.createNewPlayer)
         menu.exec_(self.playerTree.mapToGlobal(position))
 
@@ -55,9 +54,8 @@ class MainWindow(QtWidgets.QMainWindow):
         newTeam.setText(0, 'New team')
 
         self.teamTree.addTopLevelItems([newTeam])
-        #teamList.append(newTeam)
-        #playerList.append([])
-        #print(playerList)
+        teamList.append(newTeam)
+        playerList.append([])
 
     def createNewPlayer(self):
         newPlayer = QTreeWidgetItem()
@@ -93,16 +91,28 @@ class MainWindow(QtWidgets.QMainWindow):
         newPlayer.setText(0, 'New player')
 
         self.playerTree.addTopLevelItems([newPlayer])
-        #playerList[self.currentIndex].append(newPlayer)
+        playerList[self.currentTeamIndex].append(newPlayer)
 
     def itemClickTrigger(self, item, col):
-        #self.currentIndex = self.teamTree.indexOfTopLevelItem(item)
-        #self.playerTree.addTopLevelItems(playerList[self.currentIndex])
+        self.hideAllChildren(playerList[self.currentTeamIndex])
+        self.currentTeamIndex = self.teamTree.indexOfTopLevelItem(item)
+        self.showAllChildren(playerList[self.currentTeamIndex])
 
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if (col == 0) and item.childCount() \
             else item.setFlags(DEFAULT_ITEM_FLAGS)
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if col == 1 | item.childCount() \
             else None
+
+    @staticmethod
+    def hideAllChildren(children):
+        for child in children:
+            child.setHidden(True)
+
+    @staticmethod
+    def showAllChildren(children):
+        for child in children:
+            child.setHidden(False)
+
 
     def fillItemLists(self):
         for i in range(self.teamTree.invisibleRootItem().childCount()):
