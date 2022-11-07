@@ -1,0 +1,48 @@
+{
+    "teams": [
+        {
+            "players": [
+                {
+                    "name_player": "",
+                    "control_obj": "EduBotObject",
+                    "role_obj": "RoboFinist_Role",
+                    "method_control_obj": "",
+                    "ip": "",
+                    "port": ""
+                }
+            ],
+            "name_team": "",
+            "color_team": [
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "players": [
+                {
+                    "name_player": "",
+                    "control_obj": "EduBotObject",
+                    "role_obj": "RoboFinist_Role",
+                    "method_control_obj": "",
+                    "ip": "",
+                    "port": ""
+                },
+                {
+                    "name_player": "",
+                    "control_obj": "PioneerObject",
+                    "role_obj": "RoboFinist_Role",
+                    "method_control_obj": "",
+                    "ip": "12.12.12",
+                    "port": ""
+                }
+            ],
+            "name_team": "",
+            "color_team": [
+                0,
+                0,
+                0
+            ]
+        }
+    ]
+}

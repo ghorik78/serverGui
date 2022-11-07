@@ -1,9 +1,15 @@
+import dataclasses
+import json
+
 from utils.constants import *
 from utils.guiMethods import *
 from utils.templates import *
 
+from classes.serializer import PlayerParams, TeamParams, Game
+from classes.player import Player
+
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtWidgets import QWidget, QTreeWidget, QMenu, QAction, QTreeWidgetItem, QComboBox
+from PyQt5.QtWidgets import QWidget, QTreeWidget, QPushButton, QAction, QTreeWidgetItem, QComboBox
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -17,12 +23,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addContextMenus()
 
         self.teamTree = self.findChild(QTreeWidget, 'teamTree')  # list of teams
-        self.teamTree.itemClicked.connect(self.itemClickTrigger)
+        self.teamTree.itemClicked.connect(self.teamTreeItemClickTrigger)
 
         self.playerTree = self.findChild(QTreeWidget, 'playerTree')  # list of players
-        self.playerTree.itemClicked.connect(self.itemClickTrigger)
+        self.playerTree.itemClicked.connect(self.playerTreeItemClickTrigger)
 
-        self.test = QTreeWidget()
+        self.createJsonButton = self.findChild(QPushButton, 'createJsonButton')
+        self.createJsonButton.clicked.connect(self.createJson)
+
+        self.test = QPushButton()
         self.currentTeamIndex = 0
 
     def addContextMenus(self):
@@ -93,15 +102,60 @@ class MainWindow(QtWidgets.QMainWindow):
         self.playerTree.addTopLevelItems([newPlayer])
         playerList[self.currentTeamIndex].append(newPlayer)
 
-    def itemClickTrigger(self, item, col):
+    def teamTreeItemClickTrigger(self, item, col):
         self.hideAllChildren(playerList[self.currentTeamIndex])
         self.currentTeamIndex = self.teamTree.indexOfTopLevelItem(item)
         self.showAllChildren(playerList[self.currentTeamIndex])
 
+        # Flags to allow object fields editing
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if (col == 0) and item.childCount() \
             else item.setFlags(DEFAULT_ITEM_FLAGS)
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if col == 1 | item.childCount() \
             else None
+
+    def playerTreeItemClickTrigger(self, item, col):
+        item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if (col == 0) and item.childCount() \
+            else item.setFlags(DEFAULT_ITEM_FLAGS)
+        item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if col == 1 | item.childCount() \
+            else None
+
+    def createJson(self):
+        game = Game([])
+
+        for i in range(self.teamTree.invisibleRootItem().childCount()):
+            root = self.teamTree.invisibleRootItem()
+
+            name_team = root.child(i).text(1)
+            players = []
+
+            try:
+                color_team = list(map(int, self.teamTree.invisibleRootItem().child(i).child(0).text(1).split(',')))
+            except ValueError:  # if color string is empty
+                color_team = [0, 0, 0]
+
+            for player in playerList[i]:
+                if player:
+                    control_obj = self.playerTree.itemWidget(player.child(0), 1).currentText()
+                    ip = player.child(1).text(1)
+                    port = player.child(2).text(1)
+                    role_obj = self.playerTree.itemWidget(player.child(3), 1).currentText()
+                    name_player = player.child(4).text(1)
+
+                    playerParams = PlayerParams(name_player=name_player,
+                                                control_obj=control_obj,
+                                                role_obj=role_obj,
+                                                method_control_obj="",
+                                                ip=ip,
+                                                port=port)
+                    players.append(playerParams)
+
+            teamParams = TeamParams(players=players,
+                                    name_team=name_team,
+                                    color_team=color_team)
+            game.teams.append(teamParams)
+
+        with open('config.json', 'w') as output_file:
+            output_file.write(json.dumps(dataclasses.asdict(game), indent=2))
 
     @staticmethod
     def hideAllChildren(children):
@@ -113,9 +167,8 @@ class MainWindow(QtWidgets.QMainWindow):
         for child in children:
             child.setHidden(False)
 
-
-    def fillItemLists(self):
-        for i in range(self.teamTree.invisibleRootItem().childCount()):
-            teamList.append(self.teamTree.invisibleRootItem().child(i))
-        for i in range(self.playerTree.invisibleRootItem().childCount()):
-            playerList.append(self.playerTree.invisibleRootItem().child(i))
+    # def fillItemLists(self):
+    #     for i in range(self.teamTree.invisibleRootItem().childCount()):
+    #         teamList.append(self.teamTree.invisibleRootItem().child(i))
+    #     for i in range(self.playerTree.invisibleRootItem().childCount()):
+    #         playerList.append(self.playerTree.invisibleRootItem().child(i))
