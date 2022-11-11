@@ -18,8 +18,8 @@ class FilterWindow(QWidget):
 
         self.dObjectTree = self.findChild(QTreeWidget, 'dObjectTree')
 
-        self.selectButton = self.findChild(QPushButton, 'selectButton')
-        self.selectButton.clicked.connect(self.selectButtonClicked)
+        self.filterSelectButton = self.findChild(QPushButton, 'filterSelectButton')
+        self.filterSelectButton.clicked.connect(self.selectButtonClicked)
 
         self.preparePlayerList()
 
@@ -44,7 +44,7 @@ class FilterWindow(QWidget):
         child = self.dObjectTree.selectedItems()[0]
         parent = child.parent()
         if child.childCount() == 0:
-            team_ind = self.dObjectTree.indexOfTopLevelItem(child.parent())
+            team_ind = self.dObjectTree.indexOfTopLevelItem(parent)
             player_ind = parent.indexOfChild(child)
             self.close()
 

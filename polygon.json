@@ -1,0 +1,16 @@
+{
+  "objects": [
+    {
+      "role": "role not set",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    }
+  ]
+}

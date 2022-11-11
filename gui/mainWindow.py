@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import re
 
 from utils.constants import *
 from utils.guiMethods import *
@@ -8,6 +9,7 @@ from utils.templates import *
 from classes.dataclasses import *
 
 from gui.filterWindow import FilterWindow
+from gui.robotWindow import RobotWindow
 
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QComboBox, QFontComboBox
@@ -21,29 +23,48 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         uic.loadUi('uiFiles/gui.ui', self)
 
-        self.addContextMenus()
+        # Tree widgets
+        self.robotTree = self.findChild(QTreeWidget, 'robotTree_2')
+        self.robotTree.itemClicked.connect(self.robotTreeItemClickTrigger)
 
-        self.teamTree = self.findChild(QTreeWidget, 'teamTree')  # list of teams
+        self.teamTree = self.findChild(QTreeWidget, 'teamTree_2')  # list of teams
         self.teamTree.itemClicked.connect(self.teamTreeItemClickTrigger)
 
-        self.playerTree = self.findChild(QTreeWidget, 'playerTree')  # list of players
+        self.playerTree = self.findChild(QTreeWidget, 'playerTree_2')  # list of players
+        self.playerTree.itemDoubleClicked.connect(self.playerTreeDoubleClickTrigger)
         self.playerTree.itemClicked.connect(self.playerTreeItemClickTrigger)
 
-        self.objectTree = self.findChild(QTreeWidget, 'objectTree')
+        self.objectTree = self.findChild(QTreeWidget, 'objectTree_2')
         self.objectTree.itemDoubleClicked.connect(self.objectTreeDoubleClickTrigger)
         self.objectTree.itemClicked.connect(self.objectTreeItemClickTrigger)
 
-        self.createJsonButton = self.findChild(QPushButton, 'createJsonButton')
-        self.createJsonButton.clicked.connect(self.createJson)
+        # Buttons
+        self.createPolygonJsonButton = self.findChild(QPushButton, 'createPolygonJsonButton')
+        self.createPolygonJsonButton.clicked.connect(self.createPolygonJSON)
+
+        self.createRobotJsonButton = self.findChild(QPushButton, 'createRobotJsonButton')
+        self.createRobotJsonButton.clicked.connect(self.createRobotJSON)
+
+        self.createTeamJsonButton = self.findChild(QPushButton, 'createTeamJsonButton')
+        self.createTeamJsonButton.clicked.connect(self.createTeamJSON)
+
+        self.loadTeamJsonButton = self.findChild(QPushButton, 'loadTeamJsonButton')
+        #self.loadTeamJsonButton.clicked.connect(self.loadTeamJson) to do
 
         self.currentTeamIndex = 0
 
         # flags for item removing
+        self.isRobotSelected = False
         self.isTeamSelected = False
         self.isPlayerSelected = False
         self.isObjectSelected = False
 
+        self.addContextMenus()
+
     def addContextMenus(self):
+        self.robotTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.robotTree.customContextMenuRequested.connect(self.showRobotTreeContextMenu)
+
         self.teamTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.teamTree.customContextMenuRequested.connect(self.showTeamTreeContextMenu)
 
@@ -52,6 +73,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.objectTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.objectTree.customContextMenuRequested.connect(self.objectTreeContextMenu)
+
+    def showRobotTreeContextMenu(self, position):
+        menu, createAction, removeAction = callTreeContextMenu('Create new robot', 'Remove robot', self.robotTree,
+                                                               self.isRobotSelected)
+        createAction.triggered.connect(self.createNewRobot)
+        removeAction.triggered.connect(self.removeRobot) if self.isRobotSelected else None
+        menu.exec_(self.robotTree.mapToGlobal(position))
 
     def showTeamTreeContextMenu(self, position):
         menu, createAction, removeAction = callTreeContextMenu('Create new team', 'Remove team', self.playerTree,
@@ -76,6 +104,23 @@ class MainWindow(QtWidgets.QMainWindow):
         menu.exec_(self.objectTree.mapToGlobal(position))
 
     # Creating methods
+    def createNewRobot(self):
+        newRobot = QTreeWidgetItem()
+        defaultRobot = RobotParams()
+
+        for field in list(RobotParams.__annotations__.keys()):
+            newFieldItem = QTreeWidgetItem()
+            newFieldItem.setText(0, field)
+            newFieldItem.setText(1, str(defaultRobot.__dict__.get(field)))
+            newRobot.addChild(newFieldItem)
+
+            if field in ROBOT_CUSTOM_FIELDS:
+                self.robotTree.setItemWidget(newFieldItem, 1, createComboBoxSubwidget(self.width() // 5,
+                                                                                      RobotParams.aliases.get(field)))
+
+        newRobot.setText(0, 'New robot')
+        self.robotTree.addTopLevelItems([newRobot])
+
     def createNewTeam(self):
         newTeam = QTreeWidgetItem()
         defaultTeam = TeamParams([])
@@ -83,7 +128,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for field in list(TeamParams.__annotations__.keys())[1:]:  # start from 1 cuz 0 is player list
             newFieldItem = QTreeWidgetItem()
             newFieldItem.setText(0, field)
-            newFieldItem.setText(1, str((defaultTeam.__dict__.get(field))))
+            newFieldItem.setText(1, str(defaultTeam.__dict__.get(field)))
             newTeam.addChild(newFieldItem)
 
         newTeam.setText(0, 'New team')
@@ -93,6 +138,9 @@ class MainWindow(QtWidgets.QMainWindow):
         playerList.append([])
 
     def createNewPlayer(self):
+        if not self.teamTree.invisibleRootItem().childCount():
+            return
+
         newPlayer = QTreeWidgetItem()
         defaultPlayer = PlayerParams()  # object for parsing default params
 
@@ -109,6 +157,7 @@ class MainWindow(QtWidgets.QMainWindow):
         newPlayer.setText(0, 'New player')
 
         self.playerTree.addTopLevelItems([newPlayer])
+
         playerList[self.currentTeamIndex].append(newPlayer)
 
     def createNewObject(self):
@@ -130,6 +179,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.objectTree.addTopLevelItems([newObject])
 
     # Removing methods
+    def removeRobot(self):
+        root = self.robotTree.invisibleRootItem()
+        for item in self.robotTree.selectedItems():
+            (item.parent() or root).removeChild(item)
+        self.isRobotSelected = False
+
     def removeTeam(self):
         root = self.teamTree.invisibleRootItem()
         for item in self.teamTree.selectedItems():
@@ -147,6 +202,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.currentTeamIndex = 0
 
+        self.isTeamSelected = False
+
         try:
             self.teamTree.invisibleRootItem().child(0).setSelected(False)
         except AttributeError:  # if last item was removed
@@ -156,11 +213,21 @@ class MainWindow(QtWidgets.QMainWindow):
         root = self.playerTree.invisibleRootItem()
         for item in self.playerTree.selectedItems():
             (item.parent() or root).removeChild(item)
+        self.isPlayerSelected = False
 
     def removeObject(self):
         root = self.objectTree.invisibleRootItem()
         for item in self.objectTree.selectedItems():
             (item.parent() or root).removeChild(item)
+        self.isObjectSelected = False
+
+    # Triggers
+    def robotTreeItemClickTrigger(self, item, col):
+        self.isRobotSelected = True
+        item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if (col == 0) and item.childCount() \
+            else item.setFlags(DEFAULT_ITEM_FLAGS)
+        item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if col == 1 | item.childCount() \
+            else None
 
     def teamTreeItemClickTrigger(self, item, col):
         self.isTeamSelected = True
@@ -183,6 +250,11 @@ class MainWindow(QtWidgets.QMainWindow):
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if col == 1 | item.childCount() \
             else None
 
+    def playerTreeDoubleClickTrigger(self, item, col):
+        if item.text(0) == 'robot':
+            self.robotWindow = RobotWindow(self, item)
+            self.robotWindow.show()
+
     def objectTreeItemClickTrigger(self, item, col):
         self.isObjectSelected = True
 
@@ -192,10 +264,9 @@ class MainWindow(QtWidgets.QMainWindow):
             else None
 
     def objectTreeDoubleClickTrigger(self, item, col):
-        object_filter = item
         if item.text(0) == 'filter':
-            self.filter = FilterWindow(self, object_filter)
-            self.filter.show()
+            self.filterWindow = FilterWindow(self, item)
+            self.filterWindow.show()
 
     def createJson(self):
         game = Game([])
@@ -265,6 +336,39 @@ class MainWindow(QtWidgets.QMainWindow):
         with open('config.json', 'w') as output_file:
             output_file.write(json.dumps(dataclasses.asdict(config), indent=2))
             output_file.close()
+
+    def createPolygonJSON(self):
+        polygonParams = PolygonParams([])
+        root = self.objectTree.invisibleRootItem()
+        objectList = [root.child(i) for i in range(root.childCount())]
+
+        for obj in objectList:
+            dataclassPolygonObject = dataclassFromWidget(obj, ObjectParams())
+            polygonParams.objects.append(dataclassPolygonObject)
+
+        saveToFile('polygon.json', json.dumps(dataclasses.asdict(polygonParams), indent=2))
+
+    def createRobotJSON(self):
+        robotDataclass = Robots([])
+        root = self.robotTree.invisibleRootItem()
+        objectList = [root.child(i) for i in range(root.childCount())]
+
+        for obj in objectList:
+            dataclassRobotFromWidget = dataclassFromWidget(obj, RobotParams())
+            robotDataclass.robotList.append(dataclassRobotFromWidget)
+
+        saveToFile('robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
+
+    def createTeamJSON(self):
+        teamDataclass = TeamParams([])
+        root = self.teamTree.invisibleRootItem()
+        objectList = [root.child(i) for i in range(root.childCount())]
+
+        for obj in objectList:
+            playerFromWidget = dataclassFromWidget(obj, PlayerParams())
+            teamDataclass.players.append(playerFromWidget)
+
+        saveToFile('players.json', json.dumps(dataclasses.asdict(teamDataclass), indent=2))
 
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden

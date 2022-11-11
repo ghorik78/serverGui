@@ -3,21 +3,33 @@ from utils.constants import *
 import typing
 import dataclasses
 
-PLAYER_CUSTOM_FIELDS = ['control_obj', 'role_obj']  # combo box will be created for these fields
+PLAYER_CUSTOM_FIELDS = ['role_obj']  # combo box will be created for these fields
+ROBOT_CUSTOM_FIELDS = ['control_obj']
+
+
+@dataclasses.dataclass
+class RobotParams:
+    aliases = dict(control_obj=CONTROL_OBJECTS)
+
+    control_obj: str = ""
+    ip: str = "127.0.0.1"
+    port: int = 0
+
+
+@dataclasses.dataclass
+class Robots:
+    robotList: typing.List[RobotParams]
 
 
 @dataclasses.dataclass
 class PlayerParams:
     # Add new alias if you need to fill combo box by values from utils.constants
-    aliases = dict(control_obj=CONTROL_OBJECTS,
-                   role_obj=ROLES)
+    aliases = dict(role_obj=ROLES)
 
+    robot: typing.List[RobotParams] = ""
     name_player: str = "not set"
-    control_obj: str = ""
     role_obj: str = ""
     method_control_obj: str = ""
-    ip: str = "127.0.0.1"
-    port: int = 0
 
 
 @dataclasses.dataclass
@@ -37,8 +49,6 @@ OBJECT_CUSTOM_FIELDS = []
 
 @dataclasses.dataclass
 class ObjectParams:
-    aliases = dict()
-
     role: str = "role not set"
     position: list = (0, 0, 0)
     ind_for_led_controller: int = 0

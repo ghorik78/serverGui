@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>288</height>
+    <height>295</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,22 @@
 }</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="filterSelectButton">
+  <widget class="QTreeWidget" name="dRobotTree">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>361</width>
+     <height>221</height>
+    </rect>
+   </property>
+   <column>
+    <property name="text">
+     <string>Created robots</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QPushButton" name="robotSelectButton">
    <property name="geometry">
     <rect>
      <x>170</x>
@@ -46,21 +61,6 @@
    <property name="text">
     <string>Select</string>
    </property>
-  </widget>
-  <widget class="QTreeWidget" name="dObjectTree">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>361</width>
-     <height>221</height>
-    </rect>
-   </property>
-   <column>
-    <property name="text">
-     <string>Teams</string>
-    </property>
-   </column>
   </widget>
  </widget>
  <resources/>
