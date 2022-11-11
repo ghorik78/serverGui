@@ -4,12 +4,20 @@
       {
         "players": [
           {
-            "name_player": "Boomer",
-            "control_obj": "PioneerObject",
+            "name_player": "cat1",
+            "control_obj": "EduBotObject",
             "role_obj": "RoboFinist_Role",
             "method_control_obj": "",
             "ip": "12",
-            "port": "13"
+            "port": "13123"
+          },
+          {
+            "name_player": "cat2",
+            "control_obj": "PioneerObject",
+            "role_obj": "RoboFinist_Role",
+            "method_control_obj": "",
+            "ip": "3121",
+            "port": "123123"
           }
         ],
         "name_team": "",
@@ -18,25 +26,38 @@
           12,
           12
         ]
+      },
+      {
+        "players": [],
+        "name_team": "",
+        "color_team": [
+          0,
+          0,
+          0
+        ]
       }
     ]
   },
   "polygon": {
     "objects": [
       {
-        "role": "Fabric_RolePolygon",
+        "role": "TakeoffArea_RolePolygon",
         "position": [
-          123,
-          312,
+          12,
+          13,
           12
         ],
-        "ind_for_led_controller": "1",
-        "custom_settings": "1",
-        "game_mechanics": "1",
+        "ind_for_led_controller": "12",
+        "custom_settings": "3",
+        "game_mechanics": "12",
         "filter": [
           [
             0,
             0
+          ],
+          [
+            1,
+            1
           ]
         ]
       }

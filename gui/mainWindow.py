@@ -38,8 +38,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.currentTeamIndex = 0
 
-        #QTreeWidget().dou
-
         # flags for item removing
         self.isTeamSelected = False
         self.isPlayerSelected = False
@@ -80,13 +78,14 @@ class MainWindow(QtWidgets.QMainWindow):
     # Creating methods
     def createNewTeam(self):
         newTeam = QTreeWidgetItem()
+        defaultTeam = TeamParams([])
 
-        color = QTreeWidgetItem()
-        color.setText(0, 'Color')
-        name = QTreeWidgetItem()
-        name.setText(0, 'Name')
+        for field in list(TeamParams.__annotations__.keys())[1:]:  # start from 1 cuz 0 is player list
+            newFieldItem = QTreeWidgetItem()
+            newFieldItem.setText(0, field)
+            newFieldItem.setText(1, str((defaultTeam.__dict__.get(field))))
+            newTeam.addChild(newFieldItem)
 
-        newTeam.addChildren([color, name])
         newTeam.setText(0, 'New team')
 
         self.teamTree.addTopLevelItems([newTeam])
@@ -95,34 +94,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def createNewPlayer(self):
         newPlayer = QTreeWidgetItem()
+        defaultPlayer = PlayerParams()  # object for parsing default params
 
-        controlObject = QComboBox()
-        controlObject.setMaximumWidth(self.width() // 8)
-        controlObject.addItems(CONTROL_OBJECTS)
-        controlObjectItem = QTreeWidgetItem()
-        controlObjectItem.setText(0, 'ControlObject')
-        newPlayer.addChild(controlObjectItem)
-        self.playerTree.setItemWidget(controlObjectItem, 1, controlObject)
+        for field in list(PlayerParams.__annotations__.keys()):
+            newFieldItem = QTreeWidgetItem()
+            newFieldItem.setText(0, field)
+            newFieldItem.setText(1, str(defaultPlayer.__dict__.get(field)))
+            newPlayer.addChild(newFieldItem)
 
-        ipItem = QTreeWidgetItem()
-        ipItem.setText(0, 'Ip')
-        newPlayer.addChild(ipItem)
-
-        portItem = QTreeWidgetItem()
-        portItem.setText(0, 'Port')
-        newPlayer.addChild(portItem)
-
-        roleObject = QComboBox()
-        roleObject.setMaximumWidth(self.width() // 6)
-        roleObject.addItems(ROLES)
-        roleObjectItem = QTreeWidgetItem()
-        roleObjectItem.setText(0, 'Role object')
-        newPlayer.addChild(roleObjectItem)
-        self.playerTree.setItemWidget(roleObjectItem, 1, roleObject)
-
-        nameItem = QTreeWidgetItem()
-        nameItem.setText(0, 'Player name')
-        newPlayer.addChild(nameItem)
+            if field in PLAYER_CUSTOM_FIELDS:
+                self.playerTree.setItemWidget(newFieldItem, 1, createComboBoxSubwidget(self.width() // 5,
+                                                                                       PlayerParams.aliases.get(field)))
 
         newPlayer.setText(0, 'New player')
 
@@ -131,34 +113,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def createNewObject(self):
         newObject = QTreeWidgetItem()
+        defaultObject = ObjectParams()
 
-        roleObject = QComboBox()
-        roleObject.setMaximumWidth(self.width() // 5)
-        roleObject.addItems(OBJECT_ROLES)
-        roleObjectItem = QTreeWidgetItem()
-        roleObjectItem.setText(0, 'Role')
-        newObject.addChild(roleObjectItem)
-        self.objectTree.setItemWidget(roleObjectItem, 1, roleObject)
+        for field in list(ObjectParams.__annotations__.keys()):
+            newFieldItem = QTreeWidgetItem()
+            newFieldItem.setText(0, field)
+            newFieldItem.setText(1, str(defaultObject.__dict__.get(field)))
+            newObject.addChild(newFieldItem)
 
-        position = QTreeWidgetItem()
-        position.setText(0, 'Position')
-        newObject.addChild(position)
-
-        indexForLedController = QTreeWidgetItem()
-        indexForLedController.setText(0, 'Index for led controller')
-        newObject.addChild(indexForLedController)
-
-        customSettings = QTreeWidgetItem()
-        customSettings.setText(0, 'Custom settings')
-        newObject.addChild(customSettings)
-
-        gameMechanics = QTreeWidgetItem()
-        gameMechanics.setText(0, 'Game mechanics')
-        newObject.addChild(gameMechanics)
-
-        filterItem = QTreeWidgetItem()
-        filterItem.setText(0, 'Filter')
-        newObject.addChild(filterItem)
+            if field in OBJECT_CUSTOM_FIELDS:
+                self.objectTree.setItemWidget(newFieldItem, 1, createComboBoxSubwidget(self.width() // 5,
+                                                                                       ObjectParams.aliases.get(field)))
 
         newObject.setText(0, 'New object')
 
@@ -228,7 +193,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def objectTreeDoubleClickTrigger(self, item, col):
         object_filter = item
-        if item.text(0) == 'Filter':
+        if item.text(0) == 'filter':
             self.filter = FilterWindow(self, object_filter)
             self.filter.show()
 
@@ -244,7 +209,7 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 color_team = list(map(int, self.teamTree.invisibleRootItem().child(i).child(0).text(1).split(',')))
             except ValueError:  # if color string is empty
-                color_team = [0, 0, 0]
+                color_team = None  # will be set by dataclass as [0, 0, 0]
 
             for player in playerList[i]:
                 if player:

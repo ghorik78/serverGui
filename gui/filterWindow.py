@@ -25,16 +25,18 @@ class FilterWindow(QWidget):
 
     def preparePlayerList(self):
         teamRoot = self.mainUi.teamTree.invisibleRootItem()
+        teamCount = 0
 
         for strTeam in itemListToStr([teamRoot.child(i) for i in range(teamRoot.childCount())]):
             newTeamWidget = QTreeWidgetItem()
             newTeamWidget.setText(0, strTeam)
 
-            for k in range(teamRoot.childCount()):
-                for player in playerList[k]:
-                    newPlayerWidget = QTreeWidgetItem()
-                    newPlayerWidget.setText(0, player.text(0))
-                    newTeamWidget.addChild(newPlayerWidget)
+            for player in playerList[teamCount]:
+                newPlayerWidget = QTreeWidgetItem()
+                newPlayerWidget.setText(0, player.text(0))
+                newTeamWidget.addChild(newPlayerWidget)
+
+            teamCount += 1
 
             self.dObjectTree.addTopLevelItems([newTeamWidget])
 
