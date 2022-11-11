@@ -360,15 +360,21 @@ class MainWindow(QtWidgets.QMainWindow):
         saveToFile('robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
 
     def createTeamJSON(self):
-        teamDataclass = TeamParams([])
+        gameDataclass = Game([])
+
         root = self.teamTree.invisibleRootItem()
-        objectList = [root.child(i) for i in range(root.childCount())]
 
-        for obj in objectList:
-            playerFromWidget = dataclassFromWidget(obj, PlayerParams())
-            teamDataclass.players.append(playerFromWidget)
+        for i in range(root.childCount()):
+            teamWidget = root.child(i)
+            teamDataclass = dataclassFromWidget(teamWidget, TeamParams([]))
 
-        saveToFile('players.json', json.dumps(dataclasses.asdict(teamDataclass), indent=2))
+            for player in playerList[i]:
+                playerDataClass = dataclassFromWidget(player, PlayerParams())
+                teamDataclass.players.append(playerDataClass)
+
+            gameDataclass.teams.append(teamDataclass)
+
+        saveToFile('players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
 
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden

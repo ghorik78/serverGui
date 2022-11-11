@@ -1,0 +1,48 @@
+{
+  "teams": [
+    {
+      "players": [
+        {
+          "robot": "",
+          "name_player": "not set",
+          "role_obj": "",
+          "method_control_obj": ""
+        }
+      ],
+      "name_team": "not set",
+      "color_team": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "players": [
+        {
+          "robot": "",
+          "name_player": "not set",
+          "role_obj": "",
+          "method_control_obj": ""
+        },
+        {
+          "robot": "",
+          "name_player": "not set",
+          "role_obj": "",
+          "method_control_obj": ""
+        },
+        {
+          "robot": "",
+          "name_player": "not set",
+          "role_obj": "",
+          "method_control_obj": ""
+        }
+      ],
+      "name_team": "2",
+      "color_team": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}
