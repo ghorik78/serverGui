@@ -42,14 +42,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.createPolygonJsonButton = self.findChild(QPushButton, 'createPolygonJsonButton')
         self.createPolygonJsonButton.clicked.connect(self.createPolygonJSON)
 
+        self.loadPolygonJsonButton = self.findChild(QPushButton, 'loadPolygonJsonButton')
+        self.loadPolygonJsonButton.clicked.connect(self.loadPolygonJSON)
+
         self.createRobotJsonButton = self.findChild(QPushButton, 'createRobotJsonButton')
         self.createRobotJsonButton.clicked.connect(self.createRobotJSON)
+
+        self.loadRobotJsonButton = self.findChild(QPushButton, 'loadRobotJsonButton')
+        self.loadPolygonJsonButton.clicked.connect(self.loadRobotJSON)
 
         self.createTeamJsonButton = self.findChild(QPushButton, 'createTeamJsonButton')
         self.createTeamJsonButton.clicked.connect(self.createTeamJSON)
 
         self.loadTeamJsonButton = self.findChild(QPushButton, 'loadTeamJsonButton')
-        #self.loadTeamJsonButton.clicked.connect(self.loadTeamJson) to do
+        self.loadTeamJsonButton.clicked.connect(self.loadTeamJSON)
 
         self.currentTeamIndex = 0
 
@@ -268,75 +274,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.filterWindow = FilterWindow(self, item)
             self.filterWindow.show()
 
-    def createJson(self):
-        game = Game([])
-
-        for i in range(self.teamTree.invisibleRootItem().childCount()):
-            root = self.teamTree.invisibleRootItem()
-
-            name_team = root.child(i).text(1)
-            players = []
-
-            try:
-                color_team = list(map(int, self.teamTree.invisibleRootItem().child(i).child(0).text(1).split(',')))
-            except ValueError:  # if color string is empty
-                color_team = None  # will be set by dataclass as [0, 0, 0]
-
-            for player in playerList[i]:
-                if player:
-                    control_obj = self.playerTree.itemWidget(player.child(0), 1).currentText()
-                    ip = player.child(1).text(1)
-                    port = player.child(2).text(1)
-                    role_obj = self.playerTree.itemWidget(player.child(3), 1).currentText()
-                    name_player = player.child(4).text(1)
-
-                    playerParams = PlayerParams(name_player=name_player,
-                                                control_obj=control_obj,
-                                                role_obj=role_obj,
-                                                method_control_obj="",
-                                                ip=ip,
-                                                port=port)
-                    players.append(playerParams)
-
-            teamParams = TeamParams(players=players,
-                                    name_team=name_team,
-                                    color_team=color_team)
-            game.teams.append(teamParams)
-
-        objectList = []
-
-        for i in range(self.objectTree.invisibleRootItem().childCount()):
-            root = self.objectTree.invisibleRootItem()
-
-            currObject = root.child(i)
-            role = self.objectTree.itemWidget(currObject.child(0), 1).currentText()
-
-            try:
-                position = list(map(int, currObject.child(1).text(1).split(',')))
-            except ValueError:
-                position = None
-
-            ind_for_led_controller = currObject.child(2).text(1)
-            custom_settings = currObject.child(3).text(1)
-            game_mechanics = currObject.child(4).text(1)
-            filter = [list(map(int, arr)) for arr in [s.split(',') for s in currObject.child(5).text(1).split(';')]]
-
-            objectParams = ObjectParams(role=role,
-                                        position=position,
-                                        ind_for_led_controller=ind_for_led_controller,
-                                        custom_settings=custom_settings,
-                                        game_mechanics=game_mechanics,
-                                        filter=filter)
-            objectList.append(objectParams)
-
-        polygonParams = PolygonParams(objects=objectList)
-
-        config = Config(game=game, polygon=polygonParams)
-
-        with open('config.json', 'w') as output_file:
-            output_file.write(json.dumps(dataclasses.asdict(config), indent=2))
-            output_file.close()
-
     def createPolygonJSON(self):
         polygonParams = PolygonParams([])
         root = self.objectTree.invisibleRootItem()
@@ -375,6 +312,15 @@ class MainWindow(QtWidgets.QMainWindow):
             gameDataclass.teams.append(teamDataclass)
 
         saveToFile('players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
+
+    def loadPolygonJSON(self):
+        pass
+
+    def loadRobotJSON(self):
+        pass
+
+    def loadTeamJSON(self):
+        pass
 
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden
