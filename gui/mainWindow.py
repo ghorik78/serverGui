@@ -2,8 +2,8 @@ import dataclasses
 import json
 import re
 
+from classes.dataclasses import ObjectParams
 from utils.constants import *
-from utils.guiMethods import *
 from utils.templates import *
 
 from classes.dataclasses import *
@@ -12,7 +12,7 @@ from gui.filterWindow import FilterWindow
 from gui.robotWindow import RobotWindow
 
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QComboBox, QFontComboBox
+from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QComboBox, QFontComboBox, QFileDialog
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -48,8 +48,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.createRobotJsonButton = self.findChild(QPushButton, 'createRobotJsonButton')
         self.createRobotJsonButton.clicked.connect(self.createRobotJSON)
 
-        self.loadRobotJsonButton = self.findChild(QPushButton, 'loadRobotJsonButton')
-        self.loadPolygonJsonButton.clicked.connect(self.loadRobotJSON)
+        self.loadRobotJsonButton = self.findChild(QPushButton, 'loadRobotJsonBtn')
+        self.loadRobotJsonButton.clicked.connect(self.loadRobotJSON)
 
         self.createTeamJsonButton = self.findChild(QPushButton, 'createTeamJsonButton')
         self.createTeamJsonButton.clicked.connect(self.createTeamJSON)
@@ -114,7 +114,7 @@ class MainWindow(QtWidgets.QMainWindow):
         newRobot = QTreeWidgetItem()
         defaultRobot = RobotParams()
 
-        for field in list(RobotParams.__annotations__.keys()):
+        for field in list(RobotParams.__annotations__.keys())[1:]:
             newFieldItem = QTreeWidgetItem()
             newFieldItem.setText(0, field)
             newFieldItem.setText(1, str(defaultRobot.__dict__.get(field)))
@@ -131,7 +131,7 @@ class MainWindow(QtWidgets.QMainWindow):
         newTeam = QTreeWidgetItem()
         defaultTeam = TeamParams([])
 
-        for field in list(TeamParams.__annotations__.keys())[1:]:  # start from 1 cuz 0 is player list
+        for field in list(TeamParams.__annotations__.keys())[2:]:  # start from 2 cuz 0 is player list, 1 is title
             newFieldItem = QTreeWidgetItem()
             newFieldItem.setText(0, field)
             newFieldItem.setText(1, str(defaultTeam.__dict__.get(field)))
@@ -150,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
         newPlayer = QTreeWidgetItem()
         defaultPlayer = PlayerParams()  # object for parsing default params
 
-        for field in list(PlayerParams.__annotations__.keys()):
+        for field in list(PlayerParams.__annotations__.keys())[1:]:
             newFieldItem = QTreeWidgetItem()
             newFieldItem.setText(0, field)
             newFieldItem.setText(1, str(defaultPlayer.__dict__.get(field)))
@@ -170,15 +170,11 @@ class MainWindow(QtWidgets.QMainWindow):
         newObject = QTreeWidgetItem()
         defaultObject = ObjectParams()
 
-        for field in list(ObjectParams.__annotations__.keys()):
+        for field in list(ObjectParams.__annotations__.keys())[1:]:
             newFieldItem = QTreeWidgetItem()
             newFieldItem.setText(0, field)
             newFieldItem.setText(1, str(defaultObject.__dict__.get(field)))
             newObject.addChild(newFieldItem)
-
-            if field in OBJECT_CUSTOM_FIELDS:
-                self.objectTree.setItemWidget(newFieldItem, 1, createComboBoxSubwidget(self.width() // 5,
-                                                                                       ObjectParams.aliases.get(field)))
 
         newObject.setText(0, 'New object')
 
@@ -280,7 +276,7 @@ class MainWindow(QtWidgets.QMainWindow):
         objectList = [root.child(i) for i in range(root.childCount())]
 
         for obj in objectList:
-            dataclassPolygonObject = dataclassFromWidget(obj, ObjectParams())
+            dataclassPolygonObject = dataclassFromWidget(obj, ObjectParams(), self.objectTree)
             polygonParams.objects.append(dataclassPolygonObject)
 
         saveToFile('polygon.json', json.dumps(dataclasses.asdict(polygonParams), indent=2))
@@ -291,7 +287,7 @@ class MainWindow(QtWidgets.QMainWindow):
         objectList = [root.child(i) for i in range(root.childCount())]
 
         for obj in objectList:
-            dataclassRobotFromWidget = dataclassFromWidget(obj, RobotParams())
+            dataclassRobotFromWidget = dataclassFromWidget(obj, RobotParams(), self.robotTree)
             robotDataclass.robotList.append(dataclassRobotFromWidget)
 
         saveToFile('robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
@@ -303,10 +299,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         for i in range(root.childCount()):
             teamWidget = root.child(i)
-            teamDataclass = dataclassFromWidget(teamWidget, TeamParams([]))
+            teamDataclass = dataclassFromWidget(teamWidget, TeamParams([]), self.teamTree)
 
             for player in playerList[i]:
-                playerDataClass = dataclassFromWidget(player, PlayerParams())
+                playerDataClass = dataclassFromWidget(player, PlayerParams(), self.playerTree)
                 teamDataclass.players.append(playerDataClass)
 
             gameDataclass.teams.append(teamDataclass)
@@ -314,18 +310,40 @@ class MainWindow(QtWidgets.QMainWindow):
         saveToFile('players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
 
     def loadPolygonJSON(self):
-        pass
+        filepath = getSelectedJson(self, 'Select file')
+        polygon = PolygonParams(**readJSON(filepath))
+        polygon.objects = serializeChildren(polygon.objects, ObjectParams)
+        fillObjectTree(polygon, self.objectTree)
 
     def loadRobotJSON(self):
-        pass
+        filepath = getSelectedJson(self, 'Select file')
+        robots = Robots(**readJSON(filepath))
+        robots.robotList = serializeChildren(robots.robotList, RobotParams)
+        fillRobotTree(robots, self.robotTree)
 
     def loadTeamJSON(self):
-        pass
+        self.clearGameData()
+
+        filepath = getSelectedJson(self, 'Select file')
+
+        game = Game(**readJSON(filepath))
+        game.teams = serializeChildren(game.teams, TeamParams)
+
+        for team in game.teams:
+            team.players = serializeChildren(team.players, PlayerParams)
+
+        fillGameTree(game, self.teamTree, self.playerTree)
 
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden
         for child in children:
             child.setHidden(True)
+
+    def clearGameData(self):
+        self.teamTree.clear()
+        self.playerTree.clear()
+        teamList.clear()
+        playerList.clear()
 
     @staticmethod
     def showAllChildren(children):

@@ -43,7 +43,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="widget_4">
        <attribute name="title">
@@ -199,7 +199,7 @@
          <string>Create robot json</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="loaRobotJsonButton">
+       <widget class="QPushButton" name="loadRobotJsonBtn">
         <property name="geometry">
          <rect>
           <x>120</x>

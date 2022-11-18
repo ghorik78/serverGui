@@ -1,6 +1,5 @@
 from classes.dataclasses import *
 
-from utils.guiMethods import *
 from utils.templates import *
 
 from PyQt5 import uic

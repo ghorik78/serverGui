@@ -11,6 +11,7 @@ ROBOT_CUSTOM_FIELDS = ['control_obj']
 class RobotParams:
     aliases = dict(control_obj=CONTROL_OBJECTS)
 
+    title: str = "New robot"
     control_obj: str = ""
     ip: str = "127.0.0.1"
     port: int = 0
@@ -26,6 +27,7 @@ class PlayerParams:
     # Add new alias if you need to fill combo box by values from utils.constants
     aliases = dict(role_obj=ROLES)
 
+    title: str = "New player"
     robot: typing.List[RobotParams] = ""
     name_player: str = "not set"
     role_obj: str = ""
@@ -35,6 +37,8 @@ class PlayerParams:
 @dataclasses.dataclass
 class TeamParams:
     players: typing.List[PlayerParams]
+
+    title: str = "New team"
     name_team: str = "not set"
     color_team: list = (0, 0, 0)
 
@@ -49,6 +53,7 @@ OBJECT_CUSTOM_FIELDS = []
 
 @dataclasses.dataclass
 class ObjectParams:
+    title: str = "New object"
     role: str = "role not set"
     position: list = (0, 0, 0)
     ind_for_led_controller: int = 0

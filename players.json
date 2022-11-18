@@ -3,41 +3,15 @@
     {
       "players": [
         {
+          "title": "New player",
           "robot": "",
           "name_player": "not set",
-          "role_obj": "",
+          "role_obj": "RoboFinist_Role",
           "method_control_obj": ""
         }
       ],
+      "title": "New team",
       "name_team": "not set",
-      "color_team": [
-        0.0,
-        0.0,
-        0.0
-      ]
-    },
-    {
-      "players": [
-        {
-          "robot": "",
-          "name_player": "not set",
-          "role_obj": "",
-          "method_control_obj": ""
-        },
-        {
-          "robot": "",
-          "name_player": "not set",
-          "role_obj": "",
-          "method_control_obj": ""
-        },
-        {
-          "robot": "",
-          "name_player": "not set",
-          "role_obj": "",
-          "method_control_obj": ""
-        }
-      ],
-      "name_team": "2",
       "color_team": [
         0.0,
         0.0,
