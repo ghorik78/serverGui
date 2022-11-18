@@ -1,10 +1,10 @@
 {
   "robotList": [
     {
-      "title": "New robot",
-      "control_obj": "EduBotObject",
+      "title": "1",
+      "control_obj": "PioneerObject",
       "ip": "127.0.0.1",
-      "port": 0
+      "port": 666
     }
   ]
 }

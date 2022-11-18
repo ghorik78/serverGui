@@ -77,7 +77,14 @@ def fillRobotTree(robots: Robots, tree: QTreeWidget):
             fieldItem.setText(1, str(robot.__dict__.get(field)))
             newRobot.addChild(fieldItem)
 
-        print(robot.__dict__.get('title'))
+            # Creating comboBox for special field
+            # Special == needs comboBox
+            if field in ROBOT_CUSTOM_FIELDS:
+                tempComboBox = createComboBoxSubwidget(tree.parentWidget().width() // 5,
+                                                       RobotParams.aliases.get(field))
+                tempComboBox.setCurrentText(robot.__dict__.get(field))
+                tree.setItemWidget(fieldItem, 1, tempComboBox)
+
         newRobot.setText(0, robot.__dict__.get('title'))
         tree.addTopLevelItem(newRobot)
 

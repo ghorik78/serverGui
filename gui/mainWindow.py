@@ -310,22 +310,22 @@ class MainWindow(QtWidgets.QMainWindow):
         saveToFile('players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
 
     def loadPolygonJSON(self):
+        self.clearPolygonData()
         filepath = getSelectedJson(self, 'Select file')
         polygon = PolygonParams(**readJSON(filepath))
         polygon.objects = serializeChildren(polygon.objects, ObjectParams)
         fillObjectTree(polygon, self.objectTree)
 
     def loadRobotJSON(self):
+        self.clearRobotData()
         filepath = getSelectedJson(self, 'Select file')
         robots = Robots(**readJSON(filepath))
         robots.robotList = serializeChildren(robots.robotList, RobotParams)
         fillRobotTree(robots, self.robotTree)
 
     def loadTeamJSON(self):
-        self.clearGameData()
-
+        self.clearTeamData()
         filepath = getSelectedJson(self, 'Select file')
-
         game = Game(**readJSON(filepath))
         game.teams = serializeChildren(game.teams, TeamParams)
 
@@ -339,11 +339,22 @@ class MainWindow(QtWidgets.QMainWindow):
         for child in children:
             child.setHidden(True)
 
-    def clearGameData(self):
+    def clearPolygonData(self):
+        self.objectTree.clear()
+        self.isObjectSelected = False
+
+    def clearRobotData(self):
+        self.robotTree.clear()
+        self.isRobotSelected = False
+
+    def clearTeamData(self):
         self.teamTree.clear()
         self.playerTree.clear()
         teamList.clear()
         playerList.clear()
+
+        self.isTeamSelected = False
+        self.isPlayerSelected = False
 
     @staticmethod
     def showAllChildren(children):
