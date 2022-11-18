@@ -1,12 +1,5 @@
-from classes.dataclasses import *
-
-from utils.templates import *
-
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QPushButton, QTreeWidget, QTreeWidgetItem
-
-import gui.mainWindow
 
 
 class RobotWindow(QWidget):

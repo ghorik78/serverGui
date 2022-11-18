@@ -4,7 +4,7 @@
       "players": [
         {
           "title": "New player",
-          "robot": "",
+          "robot": "1",
           "name_player": "not set",
           "role_obj": "RoboFinist_Role",
           "method_control_obj": ""

@@ -1,10 +1,7 @@
 from utils.templates import *
 
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QPushButton, QTreeWidget, QTreeWidgetItem
-
-import gui.mainWindow
 
 
 class FilterWindow(QWidget):
@@ -48,6 +45,11 @@ class FilterWindow(QWidget):
             self.close()
 
             currFilter = self.object_filter.text(1)
+
+            # Don't do anything if playing has already selected
+            if f'{team_ind}, {player_ind}' in self.object_filter.text(1):
+                return
+
             if currFilter == '':
                 self.object_filter.setText(1, f'{team_ind}, {player_ind}')
             else:

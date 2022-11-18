@@ -1,7 +1,7 @@
 {
   "objects": [
     {
-      "title": "Object 1",
+      "title": "New object",
       "role": "role not set",
       "position": [
         0.0,
@@ -11,20 +11,7 @@
       "ind_for_led_controller": 0,
       "custom_settings": "",
       "game_mechanics": 0,
-      "filter": ""
-    },
-    {
-      "title": "Object 2",
-      "role": "role not set",
-      "position": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "ind_for_led_controller": 0,
-      "custom_settings": "",
-      "game_mechanics": 0,
-      "filter": ""
+      "filter": "0, 0"
     }
   ]
 }
