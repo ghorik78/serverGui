@@ -1,4 +1,5 @@
 from utils.templates import *
+from utils.localization import *
 
 from classes.dataclasses import *
 
@@ -6,7 +7,7 @@ from gui.filterWindow import FilterWindow
 from gui.robotWindow import RobotWindow
 
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QComboBox, QFontComboBox, QFileDialog
+from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
@@ -16,6 +17,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         uic.loadUi('uiFiles/gui.ui', self)
+
+        #  Menu action
+        self.actionRussian = self.findChild(QAction, 'actionRussian')
+        self.actionRussian.triggered.connect(self.translateToRUS)
+
+        self.actionEnglish = self.findChild(QAction, 'actionEnglish')
+        self.actionEnglish.triggered.connect(self.translateToEN)
 
         # Tree widgets
         self.robotTree = self.findChild(QTreeWidget, 'robotTree')
@@ -60,6 +68,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isObjectSelected = False
 
         self.addContextMenus()
+
 
     def addContextMenus(self):
         self.robotTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -361,6 +370,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.isTeamSelected = False
         self.isPlayerSelected = False
+
+    def translateToRUS(self):
+        translateToRUS(self, 0)
+
+    def translateToEN(self):
+        translateToEN(self, 0)
 
     @staticmethod
     def showAllChildren(children):

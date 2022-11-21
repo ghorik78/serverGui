@@ -4,14 +4,13 @@
       "players": [
         {
           "title": "New player",
-          "robot": "1",
+          "robot": "",
           "name_player": "not set",
           "role_obj": "RoboFinist_Role",
           "method_control_obj": ""
         }
       ],
-      "title": "New team",
-      "name_team": "not set",
+      "title": "1",
       "color_team": [
         0.0,
         0.0,

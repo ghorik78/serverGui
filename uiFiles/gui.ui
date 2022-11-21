@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>737</width>
+    <width>864</width>
     <height>612</height>
    </rect>
   </property>
@@ -21,9 +21,9 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QTabWidget" name="externalTab">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="widget">
          <attribute name="title">
@@ -36,7 +36,7 @@
              <number>0</number>
             </property>
             <item row="0" column="0">
-             <widget class="QTabWidget" name="tabWidget_2">
+             <widget class="QTabWidget" name="internalTab">
               <property name="styleSheet">
                <string notr="true"/>
               </property>
@@ -184,22 +184,14 @@
                 <string>Team creating</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_12">
-                <item row="2" column="0" colspan="2">
-                 <widget class="QPushButton" name="loadTeamJsonButton">
-                  <property name="text">
-                   <string>Load team's JSON</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0" colspan="2">
-                 <widget class="QPushButton" name="createTeamJsonButton">
-                  <property name="text">
-                   <string>Create team's JSON</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="0" column="0">
                  <widget class="QFrame" name="gridFrame_3">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                    <horstretch>3</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="styleSheet">
                    <string notr="true">border: 5px solid grey;</string>
                   </property>
@@ -246,7 +238,7 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QFrame" name="gridFrame_3">
+                 <widget class="QFrame" name="gridFrame_4">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                     <horstretch>6</horstretch>
@@ -274,15 +266,18 @@
                    </property>
                    <item row="0" column="0">
                     <widget class="QFrame" name="horizontalFrame">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                       <horstretch>5</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">border: 5px soild black;</string>
                      </property>
                      <layout class="QHBoxLayout" name="horizontalLayout_6">
                       <item>
                        <widget class="QTreeWidget" name="playerTree">
-                        <property name="styleSheet">
-                         <string notr="true"/>
-                        </property>
                         <column>
                          <property name="text">
                           <string>Player</string>
@@ -299,6 +294,20 @@
                     </widget>
                    </item>
                   </layout>
+                 </widget>
+                </item>
+                <item row="2" column="0" colspan="2">
+                 <widget class="QPushButton" name="loadTeamJsonButton">
+                  <property name="text">
+                   <string>Load team's JSON</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0" colspan="2">
+                 <widget class="QPushButton" name="createTeamJsonButton">
+                  <property name="text">
+                   <string>Create team's JSON</string>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -337,35 +346,35 @@
               </spacer>
              </item>
              <item row="0" column="0">
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="startGameButton">
                <property name="text">
                 <string>Start game</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="restartGameButton">
                <property name="text">
                 <string>Restart game</string>
                </property>
               </widget>
              </item>
              <item row="2" column="0">
-              <widget class="QPushButton" name="pushButton_3">
+              <widget class="QPushButton" name="stopGameButton">
                <property name="text">
                 <string>Stop game</string>
                </property>
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QPushButton" name="pushButton_4">
+              <widget class="QPushButton" name="resetAllButton">
                <property name="text">
                 <string>Reset all</string>
                </property>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QComboBox" name="comboBox_2">
+              <widget class="QComboBox" name="delayComboBox">
                <item>
                 <property name="text">
                  <string>Delay 0</string>
@@ -389,7 +398,7 @@
               </widget>
              </item>
              <item row="4" column="0">
-              <widget class="QPushButton" name="pushButton_5">
+              <widget class="QPushButton" name="shutdownAllButton">
                <property name="text">
                 <string>Shutdown all</string>
                </property>
@@ -426,7 +435,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QTableWidget" name="tableWidget">
+              <widget class="QTableWidget" name="infoTable">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -451,7 +460,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QTableWidget" name="tableWidget_2">
+              <widget class="QTableWidget" name="commandTable">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -510,12 +519,51 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Visualize</string>
+         </attribute>
+        </widget>
        </widget>
       </item>
      </layout>
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>864</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language</string>
+     </property>
+     <addaction name="actionRussian"/>
+     <addaction name="actionEnglish"/>
+    </widget>
+    <addaction name="menuLanguage"/>
+   </widget>
+   <addaction name="menuSettings"/>
+  </widget>
+  <action name="actionRussian">
+   <property name="text">
+    <string>Russian</string>
+   </property>
+  </action>
+  <action name="actionEnglish">
+   <property name="text">
+    <string>English</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

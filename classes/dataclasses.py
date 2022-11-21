@@ -39,7 +39,6 @@ class TeamParams:
     players: typing.List[PlayerParams]
 
     title: str = "New team"
-    name_team: str = "not set"
     color_team: list = (0, 0, 0)
 
 
