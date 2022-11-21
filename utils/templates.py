@@ -3,7 +3,8 @@ import json
 from classes.dataclasses import *
 
 from PyQt5 import Qt, QtCore
-from PyQt5.QtWidgets import QMenu, QAction, QTreeWidgetItem, QTreeWidget, QComboBox, QFileDialog
+from PyQt5.QtWidgets import QMenu, QAction, QTreeWidgetItem, QTreeWidget, QComboBox, QFileDialog, QTableWidget, \
+    QCheckBox, QTableWidgetItem, QHBoxLayout, QWidget
 
 import typing
 import re
@@ -136,6 +137,49 @@ def fillGameTree(game: Game, teamTree: QTreeWidget, playerTree: QTreeWidget):
 # Returns serialized from dictionary object
 def objectFromDict(dictionary, outputClass):
     return outputClass(**dictionary)
+
+
+def updateStateTable(dataclass, table: QTableWidget):
+    if dataclass.__class__ == ServerState:
+        table.insertRow(0)
+        items = [QTableWidgetItem(dataclass.version),
+                 QTableWidgetItem(dataclass.state),
+                 QTableWidgetItem(dataclass.gameTime)]
+        for item in items:
+            item.setTextAlignment(QtCore.Qt.AlignCenter)
+            table.setItem(0, items.index(item), item)
+
+    if dataclass.__class__ == Command:
+        currentRow = table.rowCount()
+        table.insertRow(currentRow)
+
+        widget = QWidget()
+        cb = QCheckBox()
+        layout = QHBoxLayout(widget)
+        layout.addWidget(cb)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        table.setCellWidget(currentRow, 0, widget)
+
+        items = [QTableWidgetItem(str(dataclass.id)),
+                 QTableWidgetItem(dataclass.command),
+                 QTableWidgetItem(dataclass.type),
+                 QTableWidgetItem(dataclass.state),
+                 QTableWidgetItem(str(dataclass.bullet)),
+                 QTableWidgetItem(str(dataclass.balls)),
+                 QTableWidgetItem(str(dataclass.cargo))]
+        for item in items:
+            item.setTextAlignment(QtCore.Qt.AlignCenter)
+            table.setItem(currentRow, items.index(item) + 2, item)
+
+        # block: bool = False
+        # off: bool = False
+        # id: int = 0
+        # command: str = 'unknown'
+        # type: str = 'unknown'
+        # state: str = 'unknown'
+        # bullet: int = 0
+        # balls: int = 0
+        # cargo: bool = False
 
 
 # Returns list of serialized from JSON objects

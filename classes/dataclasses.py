@@ -70,3 +70,23 @@ class PolygonParams:
 class Config:
     game: Game
     polygon: PolygonParams
+
+
+@dataclasses.dataclass
+class ServerState:
+    version: str = '1.0'
+    state: str = 'Keeping alive'
+    gameTime: str = '00:00:00'
+
+
+@dataclasses.dataclass
+class Command:
+    block: bool = False
+    off: bool = False
+    id: int = 0
+    command: str = 'unknown'
+    type: str = 'unknown'
+    state: str = 'unknown'
+    bullet: int = 0
+    balls: int = 0
+    cargo: bool = False

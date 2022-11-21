@@ -9,6 +9,8 @@ from gui.robotWindow import RobotWindow
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget
 
+import requests
+
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
@@ -17,6 +19,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         uic.loadUi('uiFiles/gui.ui', self)
+
+        session = requests.session()
+        obj = objectFromDict(session.get('http://127.0.0.1:5000/server_state').json(), ServerState)
+        updateStateTable(obj, self.infoTable)
+        obj = objectFromDict(session.get('http://127.0.0.1:5000/update').json(), Command)
+        updateStateTable(obj, self.commandTable)
+
+        print(session.post('http://127.0.0.1:5000/start_game').text)
+
 
         #  Menu action
         self.actionRussian = self.findChild(QAction, 'actionRussian')
