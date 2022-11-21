@@ -18,17 +18,17 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi('uiFiles/gui.ui', self)
 
         # Tree widgets
-        self.robotTree = self.findChild(QTreeWidget, 'robotTree_2')
+        self.robotTree = self.findChild(QTreeWidget, 'robotTree')
         self.robotTree.itemClicked.connect(self.robotTreeItemClickTrigger)
 
-        self.teamTree = self.findChild(QTreeWidget, 'teamTree_2')  # list of teams
+        self.teamTree = self.findChild(QTreeWidget, 'teamTree')  # list of teams
         self.teamTree.itemClicked.connect(self.teamTreeItemClickTrigger)
 
-        self.playerTree = self.findChild(QTreeWidget, 'playerTree_2')  # list of players
+        self.playerTree = self.findChild(QTreeWidget, 'playerTree')  # list of players
         self.playerTree.itemDoubleClicked.connect(self.playerTreeDoubleClickTrigger)
         self.playerTree.itemClicked.connect(self.playerTreeItemClickTrigger)
 
-        self.objectTree = self.findChild(QTreeWidget, 'objectTree_2')
+        self.objectTree = self.findChild(QTreeWidget, 'objectTree')
         self.objectTree.itemDoubleClicked.connect(self.objectTreeDoubleClickTrigger)
         self.objectTree.itemClicked.connect(self.objectTreeItemClickTrigger)
 
@@ -42,7 +42,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.createRobotJsonButton = self.findChild(QPushButton, 'createRobotJsonButton')
         self.createRobotJsonButton.clicked.connect(self.createRobotJSON)
 
-        self.loadRobotJsonButton = self.findChild(QPushButton, 'loadRobotJsonBtn')
+        self.loadRobotJsonButton = self.findChild(QPushButton, 'loadRobotJsonButton')
         self.loadRobotJsonButton.clicked.connect(self.loadRobotJSON)
 
         self.createTeamJsonButton = self.findChild(QPushButton, 'createTeamJsonButton')
@@ -306,27 +306,39 @@ class MainWindow(QtWidgets.QMainWindow):
     def loadPolygonJSON(self):
         self.clearPolygonData()
         filepath = getSelectedJson(self, 'Select file')
-        polygon = PolygonParams(**readJSON(filepath))
-        polygon.objects = serializeChildren(polygon.objects, ObjectParams)
-        fillObjectTree(polygon, self.objectTree)
+
+        try:
+            polygon = PolygonParams(**readJSON(filepath))
+            polygon.objects = serializeChildren(polygon.objects, ObjectParams)
+            fillObjectTree(polygon, self.objectTree)
+        except TypeError:  # if file selecting was cancelled
+            pass
 
     def loadRobotJSON(self):
         self.clearRobotData()
         filepath = getSelectedJson(self, 'Select file')
-        robots = Robots(**readJSON(filepath))
-        robots.robotList = serializeChildren(robots.robotList, RobotParams)
-        fillRobotTree(robots, self.robotTree)
+
+        try:
+            robots = Robots(**readJSON(filepath))
+            robots.robotList = serializeChildren(robots.robotList, RobotParams)
+            fillRobotTree(robots, self.robotTree)
+        except TypeError:
+            pass
 
     def loadTeamJSON(self):
         self.clearTeamData()
         filepath = getSelectedJson(self, 'Select file')
-        game = Game(**readJSON(filepath))
-        game.teams = serializeChildren(game.teams, TeamParams)
 
-        for team in game.teams:
-            team.players = serializeChildren(team.players, PlayerParams)
+        try:
+            game = Game(**readJSON(filepath))
+            game.teams = serializeChildren(game.teams, TeamParams)
 
-        fillGameTree(game, self.teamTree, self.playerTree)
+            for team in game.teams:
+                team.players = serializeChildren(team.players, PlayerParams)
+
+            fillGameTree(game, self.teamTree, self.playerTree)
+        except TypeError:
+            pass
 
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden

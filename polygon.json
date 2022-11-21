@@ -1,17 +1,17 @@
 {
   "objects": [
     {
-      "title": "New object",
-      "role": "role not set",
+      "title": "123",
+      "role": "12312",
       "position": [
         0.0,
         0.0,
         0.0
       ],
       "ind_for_led_controller": 0,
-      "custom_settings": "",
+      "custom_settings": "12",
       "game_mechanics": 0,
-      "filter": "0, 0"
+      "filter": ""
     }
   ]
 }

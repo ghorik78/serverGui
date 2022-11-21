@@ -24,6 +24,7 @@ def createComboBoxSubwidget(width: int, items: list):
     comboBox = QComboBox()
     comboBox.setMaximumWidth(width)
     comboBox.addItems(items)
+    comboBox.setStyleSheet("border: 1px solid grey;")
     return comboBox
 
 
