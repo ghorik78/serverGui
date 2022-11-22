@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>855</width>
+    <width>1022</width>
     <height>543</height>
    </rect>
   </property>
@@ -48,20 +48,6 @@
                 <string>Polygon creating</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_7">
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="createPolygonJsonButton">
-                  <property name="text">
-                   <string>Create polygon JSON</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="loadPolygonJsonButton">
-                  <property name="text">
-                   <string>Load polygon JSON</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="0" column="0">
                  <widget class="QFrame" name="gridFrame_3">
                   <property name="styleSheet">
@@ -107,6 +93,20 @@
                     </widget>
                    </item>
                   </layout>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QPushButton" name="loadPolygonJsonButton">
+                  <property name="text">
+                   <string>Load polygon JSON</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="createPolygonJsonButton">
+                  <property name="text">
+                   <string>Create polygon JSON</string>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -442,6 +442,15 @@
                  <verstretch>1</verstretch>
                 </sizepolicy>
                </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="showGrid">
+                <bool>true</bool>
+               </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
                </attribute>
@@ -473,6 +482,21 @@
                  <verstretch>11</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
                <column>
                 <property name="text">
                  <string>Block</string>
@@ -529,6 +553,15 @@
          <attribute name="title">
           <string>Visualize</string>
          </attribute>
+         <layout class="QGridLayout" name="gridLayout_14">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="0" column="0">
+             <widget class="QGraphicsView" name="graphicsView"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
@@ -541,7 +574,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>855</width>
+     <width>1022</width>
      <height>22</height>
     </rect>
    </property>

@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>988</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Game configuration</string>
+       </attribute>
+       <widget class="QTabWidget" name="TabView">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>971</width>
+          <height>561</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="widget_4">
+         <attribute name="title">
+          <string>Polygon creating</string>
+         </attribute>
+         <widget class="QGraphicsView" name="graphicsView_6">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>941</width>
+            <height>481</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGraphicsView {
+	background-color: #BBBBBB
+}</string>
+          </property>
+         </widget>
+         <widget class="QTreeWidget" name="objectTree_2">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>20</y>
+            <width>921</width>
+            <height>461</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>771</width>
+            <height>391</height>
+           </size>
+          </property>
+          <column>
+           <property name="text">
+            <string>Object</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="QPushButton" name="createPolygonJsonButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>500</y>
+            <width>111</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Create polygon json</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="loadPolygonJsonButton">
+          <property name="geometry">
+           <rect>
+            <x>130</x>
+            <y>500</y>
+            <width>111</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Load polygon json</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_3">
+         <attribute name="title">
+          <string>Robot creating</string>
+         </attribute>
+         <widget class="QGraphicsView" name="graphicsView_7">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>941</width>
+            <height>481</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGraphicsView {
+	background-color: #BBBBBB
+}</string>
+          </property>
+         </widget>
+         <widget class="QTreeWidget" name="robotTree_2">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>20</y>
+            <width>921</width>
+            <height>461</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>771</width>
+            <height>391</height>
+           </size>
+          </property>
+          <column>
+           <property name="text">
+            <string>Robot</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="QPushButton" name="createRobotJsonButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>500</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Create robot json</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="loadRobotJsonBtn">
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>500</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Load robot json</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="widget_3">
+         <attribute name="title">
+          <string>Team creating</string>
+         </attribute>
+         <widget class="QGraphicsView" name="graphicsView_3">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>271</width>
+            <height>481</height>
+           </rect>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGraphicsView {
+	background-color: #BBBBBB
+}</string>
+          </property>
+         </widget>
+         <widget class="QGraphicsView" name="graphicsView_5">
+          <property name="geometry">
+           <rect>
+            <x>290</x>
+            <y>10</y>
+            <width>661</width>
+            <height>481</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGraphicsView {
+	background-color: #BBBBBB
+}</string>
+          </property>
+         </widget>
+         <widget class="QTreeWidget" name="playerTree_2">
+          <property name="geometry">
+           <rect>
+            <x>300</x>
+            <y>20</y>
+            <width>641</width>
+            <height>461</height>
+           </rect>
+          </property>
+          <column>
+           <property name="text">
+            <string>Player list</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="QTreeWidget" name="teamTree_2">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>20</y>
+            <width>251</width>
+            <height>461</height>
+           </rect>
+          </property>
+          <column>
+           <property name="text">
+            <string>Team list</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="QPushButton" name="createTeamJsonButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>500</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Create team json</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="loadTeamJsonButton">
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>500</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Load team json</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+       <widget class="QFrame" name="frame">
+        <property name="geometry">
+         <rect>
+          <x>1000</x>
+          <y>90</y>
+          <width>120</width>
+          <height>80</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Game controller</string>
+       </attribute>
+       <widget class="QWidget" name="layoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>181</width>
+          <height>218</height>
+         </rect>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="2" column="0">
+          <widget class="QPushButton" name="button_stop">
+           <property name="text">
+            <string>Stop game</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="box_delay">
+           <item>
+            <property name="text">
+             <string>delay 0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>delay 15</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>delay 30</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>delay 60</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="button_restart">
+           <property name="text">
+            <string>Restart game</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="button_reset">
+           <property name="text">
+            <string>Reset all</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="button_start">
+           <property name="text">
+            <string>Start game</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QPushButton" name="button_shutdown">
+           <property name="text">
+            <string>Shutdown all</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QTableWidget" name="tableWidget">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>20</y>
+          <width>741</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <row>
+         <property name="text">
+          <string>info</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>Server version</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Server state</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Game_time</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QTableWidget" name="tableWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>80</y>
+          <width>741</width>
+          <height>451</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="textElideMode">
+         <enum>Qt::ElideMiddle</enum>
+        </property>
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderStretchLastSection">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>block</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>off</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Id</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Command</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>State</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Block</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Bullet</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Balls</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Cargo</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>position</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QGraphicsView" name="graphicsView_8">
+        <property name="geometry">
+         <rect>
+          <x>205</x>
+          <y>10</y>
+          <width>751</width>
+          <height>531</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QGraphicsView {
+	background-color: #BBBBBB
+}</string>
+        </property>
+       </widget>
+       <zorder>graphicsView_8</zorder>
+       <zorder>layoutWidget</zorder>
+       <zorder>tableWidget</zorder>
+       <zorder>tableWidget_2</zorder>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>988</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

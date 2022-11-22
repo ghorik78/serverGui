@@ -1,3 +1,5 @@
+import numpy as np
+
 from utils.templates import *
 from utils.localization import *
 
@@ -6,8 +8,15 @@ from classes.dataclasses import *
 from gui.filterWindow import FilterWindow
 from gui.robotWindow import RobotWindow
 
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.image import imread
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget
+from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget, QGraphicsView, QGraphicsScene, QGraphicsItem, QMessageBox
 
 import requests
 
@@ -19,15 +28,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         uic.loadUi('uiFiles/gui.ui', self)
+        self.onInit()
 
-        session = requests.session()
-        obj = objectFromDict(session.get('http://127.0.0.1:5000/server_state').json(), ServerState)
-        updateStateTable(obj, self.infoTable)
-        obj = objectFromDict(session.get('http://127.0.0.1:5000/update').json(), Command)
-        updateStateTable(obj, self.commandTable)
+    def onInit(self):
+        self.serverAddr = 'http://127.0.0.1:5000'
 
-        print(session.post('http://127.0.0.1:5000/start_game').text)
-
+        self.session = requests.session()
 
         #  Menu action
         self.actionRussian = self.findChild(QAction, 'actionRussian')
@@ -52,25 +58,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.objectTree.itemClicked.connect(self.objectTreeItemClickTrigger)
 
         # Buttons
-        self.createPolygonJsonButton = self.findChild(QPushButton, 'createPolygonJsonButton')
         self.createPolygonJsonButton.clicked.connect(self.createPolygonJSON)
-
-        self.loadPolygonJsonButton = self.findChild(QPushButton, 'loadPolygonJsonButton')
         self.loadPolygonJsonButton.clicked.connect(self.loadPolygonJSON)
-
-        self.createRobotJsonButton = self.findChild(QPushButton, 'createRobotJsonButton')
         self.createRobotJsonButton.clicked.connect(self.createRobotJSON)
-
-        self.loadRobotJsonButton = self.findChild(QPushButton, 'loadRobotJsonButton')
         self.loadRobotJsonButton.clicked.connect(self.loadRobotJSON)
-
-        self.createTeamJsonButton = self.findChild(QPushButton, 'createTeamJsonButton')
         self.createTeamJsonButton.clicked.connect(self.createTeamJSON)
-
-        self.loadTeamJsonButton = self.findChild(QPushButton, 'loadTeamJsonButton')
         self.loadTeamJsonButton.clicked.connect(self.loadTeamJSON)
+        self.startGameButton.clicked.connect(self.startGame)
 
         self.currentTeamIndex = 0
+
+        self.graphicsView = self.findChild(QGraphicsView, 'graphicsView')
+        self.graphicsScene = QGraphicsScene()
+        self.graphicsView.setScene(self.graphicsScene)
 
         # flags for item removing
         self.isRobotSelected = False
@@ -80,6 +80,52 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.addContextMenus()
 
+        # timer for plots
+        self.plotTimer = QtCore.QTimer()
+        self.plotTimer.setInterval(500)
+        self.plotTimer.timeout.connect(self.updatePlots)
+        self.plotTimer.start()
+
+        self.stateTimer = QtCore.QTimer()
+        self.stateTimer.setInterval(1000)
+        self.stateTimer.timeout.connect(self.updateState)
+        self.stateTimer.start()
+
+    def updatePlots(self):
+        self.graphicsScene.clear()
+
+        if self.externalTab.currentIndex() != 2:  # Do not do anything if the visualizing tab is hidden
+            return
+
+        matplotlib.use("Qt5agg")
+        data = self.session.get('http://127.0.0.1:5000/update').json().get('ans')  # Get position of robots
+
+        # Set up plots
+        img = imread('images/robot.png')
+        fig, ax = plt.subplots()
+        plt.ylim([-10, 110])
+        plt.xlim([-10, 110])
+        plt.grid(True)
+
+        # Plot
+        for i in range(len(data)):
+            imgBox = OffsetImage(img, zoom=0.5)
+            ab = AnnotationBbox(imgBox, (data[i][0], data[i][1]), frameon=False)
+            ax.add_artist(ab)
+
+        canvas = FigureCanvas(fig)
+        plt.close()  # Close for optimization
+        self.graphicsScene.addWidget(canvas)
+
+    def updateState(self):
+        if self.externalTab.currentIndex() != 1:
+            return
+
+        data = self.session.get(f'{self.serverAddr}/server_control').json()
+        updateStateTable(objectFromDict(data, ServerState), self.infoTable)
+
+        data = self.session.get(f'{self.serverAddr}/data_player').json()
+        updateStateTable(objectFromDict(data, Command), self.commandTable)
 
     def addContextMenus(self):
         self.robotTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -360,6 +406,27 @@ class MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
 
+    def startGame(self):
+        if not self.session.post(f'{self.serverAddr}/start_game',
+                                 params=dict(delay=self.delayComboBox.currentText().split()[1])).json().get('result'):
+            self.showWarning("Ошибка во время запуска игры.")
+
+    def restartGame(self):
+        if not self.session.post(f'{self.serverAddr}/restart_game').json().get('result'):
+            pass
+
+    def stopGame(self):
+        if not self.session.post(f'{self.serverAddr}/stop_game').json().get('result'):
+            pass
+
+    def resetAll(self):
+        if not self.session.post(f'{self.serverAddr}/reset_all').json().get('result'):
+            pass
+
+    def shutdownAll(self):
+        if not self.session.post(f'{self.serverAddr}/shutdown_all').json().get('result'):
+            pass
+
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden
         for child in children:
@@ -387,6 +454,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def translateToEN(self):
         translateToEN(self, 0)
+
+    def showWarning(self, message: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText(message)
+        msg.setWindowTitle("Error")
+        msg.exec_()
 
     @staticmethod
     def showAllChildren(children):

@@ -4,7 +4,7 @@ from classes.dataclasses import *
 
 from PyQt5 import Qt, QtCore
 from PyQt5.QtWidgets import QMenu, QAction, QTreeWidgetItem, QTreeWidget, QComboBox, QFileDialog, QTableWidget, \
-    QCheckBox, QTableWidgetItem, QHBoxLayout, QWidget
+    QCheckBox, QTableWidgetItem, QHBoxLayout, QWidget, QPushButton
 
 import typing
 import re
@@ -141,7 +141,7 @@ def objectFromDict(dictionary, outputClass):
 
 def updateStateTable(dataclass, table: QTableWidget):
     if dataclass.__class__ == ServerState:
-        table.insertRow(0)
+        table.insertRow(0) if table.rowCount() == 0 else None
         items = [QTableWidgetItem(dataclass.version),
                  QTableWidgetItem(dataclass.state),
                  QTableWidgetItem(dataclass.gameTime)]
@@ -153,12 +153,21 @@ def updateStateTable(dataclass, table: QTableWidget):
         currentRow = table.rowCount()
         table.insertRow(currentRow)
 
-        widget = QWidget()
-        cb = QCheckBox()
-        layout = QHBoxLayout(widget)
-        layout.addWidget(cb)
+        checkBoxWidget = QWidget()
+        blockCheckBox = QCheckBox()
+        layout = QHBoxLayout(checkBoxWidget)
+        layout.addWidget(blockCheckBox)
         layout.setAlignment(QtCore.Qt.AlignCenter)
-        table.setCellWidget(currentRow, 0, widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        table.setCellWidget(currentRow, 0, checkBoxWidget)
+
+        buttonWidget = QWidget()
+        blockButton = QPushButton('Block')
+        layout = QHBoxLayout(buttonWidget)
+        layout.addWidget(blockButton)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        table.setCellWidget(currentRow, 1, buttonWidget)
 
         items = [QTableWidgetItem(str(dataclass.id)),
                  QTableWidgetItem(dataclass.command),
