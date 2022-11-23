@@ -83,13 +83,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # timer for plots
         self.plotTimer = QtCore.QTimer()
         self.plotTimer.setInterval(500)
-        self.plotTimer.timeout.connect(self.updatePlots)
-        self.plotTimer.start()
+        #self.plotTimer.timeout.connect(self.updatePlots)
+        #self.plotTimer.start()
 
         self.stateTimer = QtCore.QTimer()
         self.stateTimer.setInterval(1000)
-        self.stateTimer.timeout.connect(self.updateState)
-        self.stateTimer.start()
+        #self.stateTimer.timeout.connect(self.updateState)
+        #self.stateTimer.start()
 
     def updatePlots(self):
         self.graphicsScene.clear()
