@@ -1,4 +1,5 @@
 import json
+import random
 
 from classes.dataclasses import *
 
@@ -29,9 +30,15 @@ def createComboBoxSubwidget(width: int, items: list):
     return comboBox
 
 
-# Copies each field of widget to dataclass
-# If datatype of dataclass field and widget field are different, function will change datatype of widget field
 def dataclassFromWidget(widget: QTreeWidgetItem, outputClass, parentWidget: QTreeWidget):
+    """
+    Copies each field of widget to dataclass
+    If datatype of dataclass field and widget field are different, function will change datatype of widget field
+    :param widget: QTreeWidgetItem
+    :param outputClass: Some dataclass
+    :param parentWidget: QTreeWidget
+    :return: Some dataclass
+    """
     obj = outputClass
 
     obj.__dict__['title'] = widget.text(0)
@@ -102,7 +109,7 @@ def fillGameTree(game: Game, teamTree: QTreeWidget, playerTree: QTreeWidget):
             fieldItem.setText(1, str(team.__dict__.get(field)))
             teamItem.addChild(fieldItem)
 
-            teamList.append([teamItem])
+            teamList.append(teamItem)
             playerList.append([])
 
         teamItem.setText(0, team.__dict__.get('title'))
@@ -136,6 +143,9 @@ def fillGameTree(game: Game, teamTree: QTreeWidget, playerTree: QTreeWidget):
 
 # Returns serialized from dictionary object
 def objectFromDict(dictionary, outputClass):
+    """
+    Return serialized from dictionary object
+    """
     return outputClass(**dictionary)
 
 
@@ -149,7 +159,7 @@ def updateStateTable(dataclass, table: QTableWidget):
             item.setTextAlignment(QtCore.Qt.AlignCenter)
             table.setItem(0, items.index(item), item)
 
-    if dataclass.__class__ == Command:
+    if dataclass.__class__ == PlayerItem:
         currentRow = table.rowCount()
         table.insertRow(currentRow)
 
@@ -191,14 +201,29 @@ def updateStateTable(dataclass, table: QTableWidget):
         # cargo: bool = False
 
 
-# Returns list of serialized from JSON objects
-# Will throw the TypeError if current dataclass and serialized are different (number of fields etc.)
 def serializeChildren(childrenList: list, childClass):
+    """
+    Returns list of serialized from JSON objects
+    Will throw the TypeError if current dataclass and serialized are different (number of fields etc.)
+    """
     return [childClass(**child) for child in childrenList]
 
 
-# Return dict from JSON file
-def readJSON(filepath: str):
+def PlayerItemFromPlayerWidget(playerWidget: QTreeWidgetItem, playerId: int, command: str,):
+    """Return the dataclass object made from QTreeWidgetItem"""
+    return PlayerItem(block=False,
+                      off=False,
+                      id=playerId,
+                      command=command,
+                      type='unknown',
+                      state='unknown',
+                      bullet=random.randint(10, 100),
+                      balls=random.randint(10, 100),
+                      cargo=False)
+
+
+def readJSON(filepath: str) -> dict:
+    """Returns dict from JSON file"""
     try:
         with open(filepath, 'r') as file:
             outputClass = json.loads(file.read())
@@ -208,12 +233,12 @@ def readJSON(filepath: str):
         pass
 
 
-# Makes list (0, 0, 0) from string like '(0, 0, 0)'
 def listFromStr(string: str):
+    """Makes list (0, 0, 0) from string like '(0, 0, 0)'"""
     return [float(s) for s in re.findall(r'-?\d+\.?\d*', string)]
 
 
-def itemListToStr(items):  # used for adding filters
+def itemListToStr(items):
     return [item.text(0) for item in items]
 
 
@@ -222,6 +247,7 @@ def getMaxLengthOfField(fieldList: list):
 
 
 def getFieldIndex(widget: QTreeWidgetItem, fieldName: str):
+    """Finds field index in the widget starting from zero"""
     for i in range(widget.childCount()):
         if widget.child(i).text(0) == fieldName:
             return i
@@ -229,10 +255,20 @@ def getFieldIndex(widget: QTreeWidgetItem, fieldName: str):
 
 
 def saveToFile(filename, data):
+    """Saves data to the filename"""
     with open(filename, 'w') as file:
         file.write(data)
         file.close()
 
 
 def getSelectedJson(parent, title: str):
+    """Allows selecting only 1 JSON file"""
     return QFileDialog(parent, title).getOpenFileName()[0]
+
+
+def getMultipleSelectedJson(parent):
+    """Allows multiple selecting"""
+    window = QFileDialog(parent, 'Select all JSON files')
+    window.setFileMode(QFileDialog.ExistingFiles)
+    return window.getOpenFileNames()[0]
+

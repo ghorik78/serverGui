@@ -1,0 +1,21 @@
+{
+  "teams": [
+    {
+      "players": [
+        {
+          "title": "New player",
+          "robot": "",
+          "name_player": "not set",
+          "role_obj": "RoboFinist_Role",
+          "method_control_obj": ""
+        }
+      ],
+      "title": "1",
+      "color_team": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

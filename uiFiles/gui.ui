@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1022</width>
-    <height>543</height>
+    <height>584</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <item>
        <widget class="QTabWidget" name="externalTab">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="widget">
          <attribute name="title">
@@ -48,6 +48,20 @@
                 <string>Polygon creating</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_7">
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="createPolygonJsonButton">
+                  <property name="text">
+                   <string>Create polygon JSON</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QPushButton" name="loadPolygonJsonButton">
+                  <property name="text">
+                   <string>Load polygon JSON</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="0" column="0">
                  <widget class="QFrame" name="gridFrame_3">
                   <property name="styleSheet">
@@ -95,17 +109,13 @@
                   </layout>
                  </widget>
                 </item>
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="loadPolygonJsonButton">
+                <item row="3" column="0">
+                 <widget class="QLabel" name="polygonLabel">
                   <property name="text">
-                   <string>Load polygon JSON</string>
+                   <string>File is not selected</string>
                   </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="createPolygonJsonButton">
-                  <property name="text">
-                   <string>Create polygon JSON</string>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -116,20 +126,6 @@
                 <string>Robot creating</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_9">
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="loadRobotJsonButton">
-                  <property name="text">
-                   <string>Load robot JSON</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="createRobotJsonButton">
-                  <property name="text">
-                   <string>Create robot JSON</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="0" column="0">
                  <widget class="QFrame" name="gridFrame_3">
                   <property name="styleSheet">
@@ -177,6 +173,30 @@
                   </layout>
                  </widget>
                 </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="createRobotJsonButton">
+                  <property name="text">
+                   <string>Create robot JSON</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QPushButton" name="loadRobotJsonButton">
+                  <property name="text">
+                   <string>Load robot JSON</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="robotsLabel">
+                  <property name="text">
+                   <string>File is not selected</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
               <widget class="QWidget" name="tab_4">
@@ -184,59 +204,6 @@
                 <string>Team creating</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_12">
-                <item row="0" column="0">
-                 <widget class="QFrame" name="gridFrame_3">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-                    <horstretch>3</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">border: 5px solid grey;</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_10">
-                   <property name="leftMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="topMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QFrame" name="horizontalFrame">
-                     <property name="styleSheet">
-                      <string notr="true">border: 5px soild black;</string>
-                     </property>
-                     <layout class="QHBoxLayout" name="horizontalLayout_3">
-                      <item>
-                       <widget class="QTreeWidget" name="teamTree">
-                        <column>
-                         <property name="text">
-                          <string>Team</string>
-                         </property>
-                        </column>
-                        <column>
-                         <property name="text">
-                          <string>Value</string>
-                         </property>
-                        </column>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
                 <item row="0" column="1">
                  <widget class="QFrame" name="gridFrame_4">
                   <property name="sizePolicy">
@@ -296,6 +263,59 @@
                   </layout>
                  </widget>
                 </item>
+                <item row="0" column="0">
+                 <widget class="QFrame" name="gridFrame_3">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                    <horstretch>3</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">border: 5px solid grey;</string>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout_10">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <item row="0" column="0">
+                    <widget class="QFrame" name="horizontalFrame">
+                     <property name="styleSheet">
+                      <string notr="true">border: 5px soild black;</string>
+                     </property>
+                     <layout class="QHBoxLayout" name="horizontalLayout_3">
+                      <item>
+                       <widget class="QTreeWidget" name="teamTree">
+                        <column>
+                         <property name="text">
+                          <string>Team</string>
+                         </property>
+                        </column>
+                        <column>
+                         <property name="text">
+                          <string>Value</string>
+                         </property>
+                        </column>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
                 <item row="2" column="0" colspan="2">
                  <widget class="QPushButton" name="loadTeamJsonButton">
                   <property name="text">
@@ -307,6 +327,16 @@
                  <widget class="QPushButton" name="createTeamJsonButton">
                   <property name="text">
                    <string>Create team's JSON</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0" colspan="2">
+                 <widget class="QLabel" name="teamsLabel">
+                  <property name="text">
+                   <string>File is not selected</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -332,7 +362,38 @@
              </sizepolicy>
             </property>
             <layout class="QGridLayout" name="gridLayout_4">
-             <item row="5" column="0">
+             <item row="5" column="1">
+              <widget class="QLineEdit" name="portLineEdit">
+               <property name="text">
+                <string>5555</string>
+               </property>
+               <property name="placeholderText">
+                <string>Port</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QPushButton" name="restartGameButton">
+               <property name="text">
+                <string>Restart game</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="sendJsonButton">
+               <property name="text">
+                <string>Send JSON</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QPushButton" name="startGameButton">
+               <property name="text">
+                <string>Start game</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
               <spacer name="verticalSpacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -345,35 +406,14 @@
                </property>
               </spacer>
              </item>
-             <item row="0" column="0">
-              <widget class="QPushButton" name="startGameButton">
-               <property name="text">
-                <string>Start game</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="restartGameButton">
-               <property name="text">
-                <string>Restart game</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
+             <item row="4" column="0">
               <widget class="QPushButton" name="stopGameButton">
                <property name="text">
                 <string>Stop game</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QPushButton" name="resetAllButton">
-               <property name="text">
-                <string>Reset all</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
+             <item row="2" column="1">
               <widget class="QComboBox" name="delayComboBox">
                <item>
                 <property name="text">
@@ -397,10 +437,59 @@
                </item>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QPushButton" name="shutdownAllButton">
+             <item row="1" column="0">
+              <widget class="QPushButton" name="createGameButton">
                <property name="text">
-                <string>Shutdown all</string>
+                <string>Create game</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="jsonSelectingComboBox">
+               <item>
+                <property name="text">
+                 <string>Polygon</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Robots</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Teams</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>All</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Select manually</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLineEdit" name="hostnameLineEdit">
+               <property name="text">
+                <string>127.0.0.1</string>
+               </property>
+               <property name="placeholderText">
+                <string>Host</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0" colspan="2">
+              <widget class="QLabel" name="statusLabel">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
               </widget>
              </item>

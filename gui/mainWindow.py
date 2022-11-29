@@ -1,3 +1,6 @@
+import configparser
+import json
+
 import numpy as np
 
 from utils.templates import *
@@ -16,7 +19,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from PyQt5 import QtWidgets, uic, QtCore
-from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget, QGraphicsView, QGraphicsScene, QGraphicsItem, QMessageBox
+from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget, QGraphicsView, QGraphicsScene, \
+    QGraphicsItem, QMessageBox, QLabel, QLineEdit
 
 import requests
 
@@ -25,15 +29,21 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    """
+    The main class for this application.
+    OnInit() method contains all child elements.
+    """
+
     def __init__(self):
         super(MainWindow, self).__init__()
         uic.loadUi('uiFiles/gui.ui', self)
         self.onInit()
 
     def onInit(self):
-        self.serverAddr = 'http://127.0.0.1:5000'
-
-        self.session = requests.session()
+        # localization
+        self.currentLocale = 'EN'
+        self.config = configparser.ConfigParser()
+        self.config.read(f'locales/{self.currentLocale}.ini', encoding='utf-8')
 
         #  Menu action
         self.actionRussian = self.findChild(QAction, 'actionRussian')
@@ -64,13 +74,28 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loadRobotJsonButton.clicked.connect(self.loadRobotJSON)
         self.createTeamJsonButton.clicked.connect(self.createTeamJSON)
         self.loadTeamJsonButton.clicked.connect(self.loadTeamJSON)
+
+        self.sendJsonButton.clicked.connect(self.sendJson)
+        self.createGameButton.clicked.connect(self.createGame)
         self.startGameButton.clicked.connect(self.startGame)
+        self.restartGameButton.clicked.connect(self.restartGame)
+        self.stopGameButton.clicked.connect(self.stopGame)
 
-        self.currentTeamIndex = 0
+        # ComboBoxes
+        self.jsonSelectingComboBox.currentIndexChanged.connect(self.sendJson)
 
+        # LineEdits
+        self.hostnameLineEdit.textChanged.connect(self.updateServerAddress)
+        self.portLineEdit.textChanged.connect(self.updateServerAddress)
+
+        # Graphics
         self.graphicsView = self.findChild(QGraphicsView, 'graphicsView')
         self.graphicsScene = QGraphicsScene()
         self.graphicsView.setScene(self.graphicsScene)
+
+        # Client-server
+        self.serverAddr = ''
+        self.session = requests.session()
 
         # flags for item removing
         self.isRobotSelected = False
@@ -78,18 +103,31 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isPlayerSelected = False
         self.isObjectSelected = False
 
-        self.addContextMenus()
+        # flags for file selecting
+        self.isPolygonJsonSelected = False
+        self.isRobotsJsonSelected = False
+        self.isTeamsJsonSelected = False
 
-        # timer for plots
+        # flags for game preparing
+        self.isReadyToCreate = False
+
+        # timers for plots
         self.plotTimer = QtCore.QTimer()
         self.plotTimer.setInterval(500)
-        #self.plotTimer.timeout.connect(self.updatePlots)
-        #self.plotTimer.start()
+        self.plotTimer.timeout.connect(self.updatePlots)
+        # self.plotTimer.start()
 
         self.stateTimer = QtCore.QTimer()
         self.stateTimer.setInterval(1000)
-        #self.stateTimer.timeout.connect(self.updateState)
-        #self.stateTimer.start()
+        self.stateTimer.timeout.connect(self.updateState)
+        # self.stateTimer.start()
+
+        # Other variables
+        self.filesSent = []
+        self.currentTeamIndex = 0
+
+        self.addContextMenus()
+        self.translateToEN()
 
     def updatePlots(self):
         self.graphicsScene.clear()
@@ -330,6 +368,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.filterWindow = FilterWindow(self, item)
             self.filterWindow.show()
 
+    def updateServerAddress(self):
+        self.serverAddr = f"http://{self.hostnameLineEdit.text()}:{self.portLineEdit.text()}/"
+
+    # Button controllers
     def createPolygonJSON(self):
         polygonParams = PolygonParams([])
         root = self.objectTree.invisibleRootItem()
@@ -339,7 +381,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dataclassPolygonObject = dataclassFromWidget(obj, ObjectParams(), self.objectTree)
             polygonParams.objects.append(dataclassPolygonObject)
 
-        saveToFile('polygon.json', json.dumps(dataclasses.asdict(polygonParams), indent=2))
+        saveToFile('json/polygon.json', json.dumps(dataclasses.asdict(polygonParams), indent=2))
 
     def createRobotJSON(self):
         robotDataclass = Robots([])
@@ -350,7 +392,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dataclassRobotFromWidget = dataclassFromWidget(obj, RobotParams(), self.robotTree)
             robotDataclass.robotList.append(dataclassRobotFromWidget)
 
-        saveToFile('robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
+        saveToFile('json/robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
 
     def createTeamJSON(self):
         gameDataclass = Game([])
@@ -367,9 +409,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
             gameDataclass.teams.append(teamDataclass)
 
-        saveToFile('players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
+        saveToFile('json/players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
 
     def loadPolygonJSON(self):
+        """Loads Polygon's dataclass from the JSON file"""
         self.clearPolygonData()
         filepath = getSelectedJson(self, 'Select file')
 
@@ -377,10 +420,13 @@ class MainWindow(QtWidgets.QMainWindow):
             polygon = PolygonParams(**readJSON(filepath))
             polygon.objects = serializeChildren(polygon.objects, ObjectParams)
             fillObjectTree(polygon, self.objectTree)
+            self.polygonLabel.setText(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}")
+            self.isPolygonJsonSelected = True
         except TypeError:  # if file selecting was cancelled
             pass
 
     def loadRobotJSON(self):
+        """Loads robot dataclass from the JSON file"""
         self.clearRobotData()
         filepath = getSelectedJson(self, 'Select file')
 
@@ -388,10 +434,13 @@ class MainWindow(QtWidgets.QMainWindow):
             robots = Robots(**readJSON(filepath))
             robots.robotList = serializeChildren(robots.robotList, RobotParams)
             fillRobotTree(robots, self.robotTree)
+            self.robotsLabel.setText(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}")
+            self.isRobotsJsonSelected = True
         except TypeError:
             pass
 
     def loadTeamJSON(self):
+        """Loads team's dataclass from the JSON file"""
         self.clearTeamData()
         filepath = getSelectedJson(self, 'Select file')
 
@@ -403,29 +452,154 @@ class MainWindow(QtWidgets.QMainWindow):
                 team.players = serializeChildren(team.players, PlayerParams)
 
             fillGameTree(game, self.teamTree, self.playerTree)
+            self.teamsLabel.setText(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}")
+            self.isTeamsJsonSelected = True
         except TypeError:
             pass
 
+    def sendJson(self):
+        """
+        Sends JSON file(-s) to the http server.
+
+        If you want to send tab's json file, make sure that it was loaded and still in the directory.
+        """
+
+        # 0 index is polygon
+        # 1 index is robots
+        # 2 index is teams & players
+        # 3 index is all
+        currIndex = self.jsonSelectingComboBox.currentIndex()
+
+        try:
+            if (currIndex == 0) and self.isPolygonJsonSelected:
+                data = open("json/polygon.json").read()
+
+                try:
+                    self.session.get(f"{self.serverAddr}", params=dict(target="set",
+                                                                       type_command="core",
+                                                                       command="save_json",
+                                                                       filename='polygon.json'), json=data)
+                except requests.exceptions.MissingSchema or ConnectionError:
+                    self.showWarning(self.config.get("LOCALE", "hostError"))
+
+            elif (currIndex == 1) and self.isRobotsJsonSelected:
+                data = open("json/robots.json").read()
+
+                try:
+                    self.session.get(f"{self.serverAddr}", params=dict(target="set",
+                                                                       type_command="core",
+                                                                       command="save_json",
+                                                                       filename='robots.json'), json=data)
+                except requests.exceptions.MissingSchema or ConnectionError:
+                    self.showWarning(self.config.get("LOCALE", "hostError"))
+
+            elif (currIndex == 2) and self.isTeamsJsonSelected:
+                data = open("json/players.json").read()
+
+                try:
+                    self.session.get(f"{self.serverAddr}", params=dict(target="set",
+                                                                       type_command="core",
+                                                                       command="save_json",
+                                                                       filename='players'), json=data)
+                except requests.exceptions.MissingSchema or ConnectionError:
+                    self.showWarning(self.config.get("LOCALE", "hostError"))
+
+            else:
+                files = getMultipleSelectedJson(self)
+
+                trashFlag = False  # will be set to True if not json
+
+                for file in files:
+                    filename = file.split('/')[-1].split('.')[0]
+                    filetype = file.split('/')[-1].split('.')[1]
+
+                    self.filesSent.append(filename) if filename not in self.filesSent else None
+
+                    if filetype != 'json':
+                        trashFlag = True
+                        continue
+
+                    data = open(file).read()
+
+                    try:
+                        self.session.get(f"{self.serverAddr}", params=dict(target="set",
+                                                                           type_command="core",
+                                                                           command=f"save_json",
+                                                                           filename=filename), json=data)
+                        self.statusLabel.setText(self.config.get('LOCALE', 'successfully'))
+                    except requests.exceptions.MissingSchema or ConnectionError:
+                        self.isReadyToCreate = False
+                        self.statusLabel.setText(self.config.get('LOCALE', 'error'))
+                        self.showWarning(self.config.get("LOCALE", "hostError"))
+                        return
+
+                if trashFlag:  # Show error message if file extension != json
+                    self.showWarning(self.config.get("LOCALE", "wrongExtension"))
+                    return
+
+                self.isReadyToCreate = True
+
+        except FileNotFoundError or TypeError:
+            self.showWarning(self.config.get("LOCALE", "fileNotFound"))
+
+    def createGame(self):
+        """Sends game create request"""
+        if (len(self.filesSent) < 3) or not self.isReadyToCreate:
+            self.showWarning(self.config.get('LOCALE', 'notEnoughFiles'))
+            return
+
+        try:
+            data = self.session.get(f'{self.serverAddr}', params=dict(target="set",
+                                                                      type_command="core",
+                                                                      command="create_game",
+                                                                      param=None)).json().get('data')
+
+            self.statusLabel.setText(self.config.get('LOCALE', 'successfully'))
+
+            updateStateTable(objectFromDict(json.loads(data), ServerState), self.infoTable)
+
+            playerId = 0
+            for team in teamList:
+                currTeamIdx = teamList.index(team)
+
+                for player in playerList[currTeamIdx]:
+                    playerItem = PlayerItemFromPlayerWidget(player, playerId, team.text(0))
+                    playerId += 1
+
+                    updateStateTable(playerItem, self.commandTable)
+
+        except requests.exceptions.MissingSchema or ConnectionError:
+            self.showWarning(self.config.get('LOCALE', 'hostError'))
+
     def startGame(self):
-        if not self.session.post(f'{self.serverAddr}/start_game',
-                                 params=dict(delay=self.delayComboBox.currentText().split()[1])).json().get('result'):
-            self.showWarning("Ошибка во время запуска игры.")
+        """Sends game start request"""
+        try:
+            self.session.get(f'{self.serverAddr}', params=dict(target="set",
+                                                               type_command="core",
+                                                               command="start_game",
+                                                               param=self.delayComboBox.currentText().split()[-1]))
+        except requests.exceptions.MissingSchema or ConnectionError:
+            self.showWarning(self.config.get('LOCALE', 'hostError'))
 
     def restartGame(self):
-        if not self.session.post(f'{self.serverAddr}/restart_game').json().get('result'):
-            pass
+        """Sends game restart request"""
+        try:
+            self.session.get(f'{self.serverAddr}', params=dict(target="set",
+                                                               type_command="core",
+                                                               command="restart_game",
+                                                               param=None))
+        except requests.exceptions.MissingSchema or ConnectionError:
+            self.showWarning(self.config.get('LOCALE', 'hostError'))
 
     def stopGame(self):
-        if not self.session.post(f'{self.serverAddr}/stop_game').json().get('result'):
-            pass
-
-    def resetAll(self):
-        if not self.session.post(f'{self.serverAddr}/reset_all').json().get('result'):
-            pass
-
-    def shutdownAll(self):
-        if not self.session.post(f'{self.serverAddr}/shutdown_all').json().get('result'):
-            pass
+        """Sends game stop request"""
+        try:
+            self.session.get(f'{self.serverAddr}', params=dict(target="set",
+                                                               type_command="core",
+                                                               command="stop_game",
+                                                               param=None))
+        except requests.exceptions.MissingSchema or ConnectionError:
+            self.showWarning(self.config.get('LOCALE', 'hostError'))
 
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden
@@ -450,9 +624,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isPlayerSelected = False
 
     def translateToRUS(self):
+        self.currentLocale = 'RU'
         translateToRUS(self, 0)
 
     def translateToEN(self):
+        self.currentLocale = 'EN'
         translateToEN(self, 0)
 
     def showWarning(self, message: str):

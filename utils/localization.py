@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 
-from PyQt5.QtWidgets import QMainWindow, QTableWidget
+from PyQt5.QtWidgets import QMainWindow, QTableWidget, QLineEdit
 
 
 # type == 0 is mainWindow, type == 1 is filterWindow, type == 2 is robotWindow
@@ -15,13 +15,12 @@ def translateToEN(window, windowType):
 
 
 def translateMainWindow(mainWindow: QMainWindow, language):
+    """Translates children in the mainWindow."""
     parser = ConfigParser()
     parser.read(f'locales/{language}.ini', encoding='UTF-8')
 
     mainWindow.setWindowTitle(parser.get('LOCALE', 'windowTitle'))
 
-
-    #QTreeWidget.
     mainWindow.menuSettings.setTitle(parser.get('LOCALE', 'settingsMenuText'))
     mainWindow.menuLanguage.setTitle(parser.get('LOCALE', 'languageMenuText'))
     mainWindow.actionRussian.setText(parser.get('LOCALE', 'russianLabel'))
@@ -51,16 +50,26 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.createTeamJsonButton.setText(parser.get('LOCALE', 'createTeamJson'))
     mainWindow.loadTeamJsonButton.setText(parser.get('LOCALE', 'loadTeamJson'))
 
+    mainWindow.polygonLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
+    mainWindow.robotsLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
+    mainWindow.teamsLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
+
+    mainWindow.sendJsonButton.setText(parser.get('LOCALE', 'sendJson'))
+    mainWindow.createGameButton.setText(parser.get('LOCALE', 'createGame'))
     mainWindow.startGameButton.setText(parser.get('LOCALE', 'startGame'))
     mainWindow.restartGameButton.setText(parser.get('LOCALE', 'restartGame'))
     mainWindow.stopGameButton.setText(parser.get('LOCALE', 'stopGame'))
-    mainWindow.resetAllButton.setText(parser.get('LOCALE', 'resetAll'))
-    mainWindow.shutdownAllButton.setText(parser.get('LOCALE', 'shutdownAll'))
 
     mainWindow.delayComboBox.setItemText(0, parser.get('LOCALE', 'delay0'))
     mainWindow.delayComboBox.setItemText(1, parser.get('LOCALE', 'delay1'))
     mainWindow.delayComboBox.setItemText(2, parser.get('LOCALE', 'delay2'))
     mainWindow.delayComboBox.setItemText(3, parser.get('LOCALE', 'delay3'))
+
+    mainWindow.jsonSelectingComboBox.setItemText(0, parser.get('LOCALE', 'polygon'))
+    mainWindow.jsonSelectingComboBox.setItemText(1, parser.get('LOCALE', 'robots'))
+    mainWindow.jsonSelectingComboBox.setItemText(2, parser.get('LOCALE', 'teams'))
+    mainWindow.jsonSelectingComboBox.setItemText(3, parser.get('LOCALE', 'all'))
+    mainWindow.jsonSelectingComboBox.setItemText(4, parser.get('LOCALE', 'selectManually'))
 
     mainWindow.infoTable.horizontalHeaderItem(0).setText(parser.get('LOCALE', 'info0'))
     mainWindow.infoTable.horizontalHeaderItem(1).setText(parser.get('LOCALE', 'info1'))
@@ -75,5 +84,11 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.commandTable.horizontalHeaderItem(6).setText(parser.get('LOCALE', 'command6'))
     mainWindow.commandTable.horizontalHeaderItem(7).setText(parser.get('LOCALE', 'command7'))
     mainWindow.commandTable.horizontalHeaderItem(8).setText(parser.get('LOCALE', 'command8'))
+
+    mainWindow.hostnameLineEdit.setPlaceholderText(parser.get('LOCALE', 'hostnamePlaceholder'))
+    mainWindow.portLineEdit.setPlaceholderText(parser.get('LOCALE', 'portPlaceholder'))
+
+    mainWindow.statusLabel.setText(parser.get('LOCALE', 'selectAction'))
+
 
 

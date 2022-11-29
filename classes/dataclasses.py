@@ -80,7 +80,7 @@ class ServerState:
 
 
 @dataclasses.dataclass
-class Command:
+class PlayerItem:
     block: bool = False
     off: bool = False
     id: int = 0
