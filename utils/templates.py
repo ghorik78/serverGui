@@ -100,6 +100,15 @@ def fillRobotTree(robots: Robots, tree: QTreeWidget):
 
 # Fills tree from game dataclass
 def fillGameTree(game: Game, teamTree: QTreeWidget, playerTree: QTreeWidget):
+    """
+    Fills the game tree by dataclass objects.
+    After loading JSON file the program will set team 0 as current.
+    The program will show items which is in team 0. Other objects will be hidden.
+    :param game: Game dataclass
+    :param teamTree: QTreeWidget
+    :param playerTree: QTreeWidget
+    :return: None
+    """
     for team in game.teams:
         teamItem = QTreeWidgetItem()
 
@@ -134,9 +143,6 @@ def fillGameTree(game: Game, teamTree: QTreeWidget, playerTree: QTreeWidget):
 
             playerItem.setText(0, player.__dict__.get('title'))
 
-            # After loading JSON file the program will set team 0 as current
-            # The program will show items which is in team 0
-            # Other objects will be hidden
             if game.teams.index(team) == 0:
                 playerTree.addTopLevelItem(playerItem)
 
@@ -209,7 +215,7 @@ def serializeChildren(childrenList: list, childClass):
     return [childClass(**child) for child in childrenList]
 
 
-def PlayerItemFromPlayerWidget(playerWidget: QTreeWidgetItem, playerId: int, command: str,):
+def PlayerItemFromPlayerWidget(playerWidget: QTreeWidgetItem, playerId: int, command: str, ):
     """Return the dataclass object made from QTreeWidgetItem"""
     return PlayerItem(block=False,
                       off=False,
@@ -239,6 +245,11 @@ def listFromStr(string: str):
 
 
 def itemListToStr(items):
+    """
+    Returns array of string made from list of Widgets
+    :param items: QTreeWidgetItem
+    :return: list of str
+    """
     return [item.text(0) for item in items]
 
 
@@ -271,4 +282,3 @@ def getMultipleSelectedJson(parent):
     window = QFileDialog(parent, 'Select all JSON files')
     window.setFileMode(QFileDialog.ExistingFiles)
     return window.getOpenFileNames()[0]
-
