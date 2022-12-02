@@ -3,7 +3,7 @@ from utils.constants import *
 import typing
 import dataclasses
 
-PLAYER_CUSTOM_FIELDS = ['role_obj']  # combo box will be created for these fields
+PLAYER_CUSTOM_FIELDS = []  # combo box will be created for these fields
 ROBOT_CUSTOM_FIELDS = ['control_obj']
 
 

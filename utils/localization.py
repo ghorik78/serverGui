@@ -29,10 +29,8 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.externalTab.setTabText(0, parser.get('LOCALE', 'exTabText0'))
     mainWindow.externalTab.setTabText(1, parser.get('LOCALE', 'exTabText1'))
     mainWindow.externalTab.setTabText(2, parser.get('LOCALE', 'exTabText2'))
-
-    mainWindow.internalTab.setTabText(0, parser.get('LOCALE', 'inTabText0'))
-    mainWindow.internalTab.setTabText(1, parser.get('LOCALE', 'inTabText1'))
-    mainWindow.internalTab.setTabText(2, parser.get('LOCALE', 'inTabText2'))
+    mainWindow.externalTab.setTabText(3, parser.get('LOCALE', 'exTabText3'))
+    mainWindow.externalTab.setTabText(4, parser.get('LOCALE', 'exTabText4'))
 
     mainWindow.objectTree.headerItem().setText(0, parser.get('LOCALE', 'polyColumn0'))
     mainWindow.objectTree.headerItem().setText(1, parser.get('LOCALE', 'valueTitle'))
@@ -42,17 +40,6 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.teamTree.headerItem().setText(1, parser.get('LOCALE', 'valueTitle'))
     mainWindow.playerTree.headerItem().setText(0, parser.get('LOCALE', 'playerColumn0'))
     mainWindow.playerTree.headerItem().setText(1, parser.get('LOCALE', 'valueTitle'))
-
-    mainWindow.createPolygonJsonButton.setText(parser.get('LOCALE', 'createPolyJson'))
-    mainWindow.loadPolygonJsonButton.setText(parser.get('LOCALE', 'loadPolyJson'))
-    mainWindow.createRobotJsonButton.setText(parser.get('LOCALE', 'createRobotJson'))
-    mainWindow.loadRobotJsonButton.setText(parser.get('LOCALE', 'loadRobotJson'))
-    mainWindow.createTeamJsonButton.setText(parser.get('LOCALE', 'createTeamJson'))
-    mainWindow.loadTeamJsonButton.setText(parser.get('LOCALE', 'loadTeamJson'))
-
-    mainWindow.polygonLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
-    mainWindow.robotsLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
-    mainWindow.teamsLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
 
     mainWindow.sendJsonButton.setText(parser.get('LOCALE', 'sendJson'))
     mainWindow.createGameButton.setText(parser.get('LOCALE', 'createGame'))

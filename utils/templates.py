@@ -1,3 +1,4 @@
+import configparser
 import json
 import random
 
@@ -64,13 +65,21 @@ def dataclassFromWidget(widget: QTreeWidgetItem, outputClass, parentWidget: QTre
     return obj
 
 
-def fillObjectTree(polygon: PolygonParams, tree: QTreeWidget):
+def fillObjectTree(polygon: PolygonParams, tree: QTreeWidget, config: configparser.ConfigParser | None):
+    """
+    Fills the object tree using polygon dataclass.
+    :param polygon: PolygonParams dataclass
+    :param tree: QTreeWidget
+    :param config: ConfigParser
+    :return: None
+    """
     for obj in polygon.objects:
         newObject = QTreeWidgetItem()
         for field in list(obj.__annotations__.keys())[1:]:
             fieldItem = QTreeWidgetItem()
             fieldItem.setText(0, str(field))
             fieldItem.setText(1, str(obj.__dict__.get(field)))
+            fieldItem.setToolTip(1, "Press to do smth")
             newObject.addChild(fieldItem)
 
         newObject.setText(0, obj.__dict__.get('title'))
@@ -96,6 +105,10 @@ def fillRobotTree(robots: Robots, tree: QTreeWidget):
 
         newRobot.setText(0, robot.__dict__.get('title'))
         tree.addTopLevelItem(newRobot)
+
+
+def fillComboBoxByRoles(rolesDict: dict, comboBox: QComboBox):
+    comboBox.addItems(rolesDict.keys())
 
 
 # Fills tree from game dataclass
@@ -272,6 +285,10 @@ def saveToFile(filename, data):
         file.close()
 
 
+def getOutputPath(parent, title):
+    return QFileDialog(parent, title).getExistingDirectory()
+
+
 def getSelectedJson(parent, title: str):
     """Allows selecting only 1 JSON file"""
     return QFileDialog(parent, title).getOpenFileName()[0]
@@ -282,3 +299,4 @@ def getMultipleSelectedJson(parent):
     window = QFileDialog(parent, 'Select all JSON files')
     window.setFileMode(QFileDialog.ExistingFiles)
     return window.getOpenFileNames()[0]
+

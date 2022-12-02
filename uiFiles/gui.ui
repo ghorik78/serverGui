@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1022</width>
-    <height>584</height>
+    <width>1033</width>
+    <height>615</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,199 +23,445 @@
       <item>
        <widget class="QTabWidget" name="externalTab">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
-        <widget class="QWidget" name="widget">
+        <widget class="QWidget" name="tab_6">
          <attribute name="title">
-          <string>Game configuration</string>
+          <string>Polygon creating</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_2">
-            <property name="horizontalSpacing">
-             <number>0</number>
+         <layout class="QGridLayout" name="gridLayout_20">
+          <item row="1" column="0">
+           <widget class="QFrame" name="horizontalFrame_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>13</verstretch>
+             </sizepolicy>
             </property>
-            <item row="0" column="0">
-             <widget class="QTabWidget" name="internalTab">
-              <property name="styleSheet">
-               <string notr="true"/>
-              </property>
-              <property name="currentIndex">
-               <number>0</number>
-              </property>
-              <widget class="QWidget" name="tab_3">
-               <attribute name="title">
-                <string>Polygon creating</string>
-               </attribute>
-               <layout class="QGridLayout" name="gridLayout_7">
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="createPolygonJsonButton">
-                  <property name="text">
-                   <string>Create polygon JSON</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="loadPolygonJsonButton">
-                  <property name="text">
-                   <string>Load polygon JSON</string>
-                  </property>
-                 </widget>
-                </item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QFrame" name="gridFrame">
+               <property name="styleSheet">
+                <string notr="true">border: 5px solid grey;</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_16" rowstretch="0">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
                 <item row="0" column="0">
-                 <widget class="QFrame" name="gridFrame_3">
+                 <widget class="QTreeWidget" name="objectTree">
                   <property name="styleSheet">
-                   <string notr="true">border: 5px solid grey;</string>
+                   <string notr="true">border: 0px;</string>
                   </property>
-                  <layout class="QGridLayout" name="gridLayout_6">
-                   <property name="leftMargin">
-                    <number>0</number>
+                  <column>
+                   <property name="text">
+                    <string>Object</string>
                    </property>
-                   <property name="topMargin">
-                    <number>0</number>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string>Value</string>
                    </property>
-                   <property name="rightMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QFrame" name="horizontalFrame">
-                     <property name="styleSheet">
-                      <string notr="true">border: 5px soild grey;</string>
-                     </property>
-                     <layout class="QHBoxLayout" name="horizontalLayout">
-                      <item>
-                       <widget class="QTreeWidget" name="objectTree">
-                        <column>
-                         <property name="text">
-                          <string>Object</string>
-                         </property>
-                        </column>
-                        <column>
-                         <property name="text">
-                          <string>Value</string>
-                         </property>
-                        </column>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                   </item>
-                  </layout>
+                  </column>
                  </widget>
                 </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="polygonLabel">
-                  <property name="text">
-                   <string>File is not selected</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="gridFrame_2">
+               <property name="styleSheet">
+                <string notr="true">border: 5px solid grey;</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_17">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item row="0" column="0">
+                 <widget class="QGraphicsView" name="polygonGraphicsView">
+                  <property name="styleSheet">
+                   <string notr="true">border: 0px;</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </widget>
-              <widget class="QWidget" name="tab_5">
-               <attribute name="title">
-                <string>Robot creating</string>
-               </attribute>
-               <layout class="QGridLayout" name="gridLayout_9">
-                <item row="0" column="0">
-                 <widget class="QFrame" name="gridFrame_3">
-                  <property name="styleSheet">
-                   <string notr="true">border: 5px solid grey;</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_8">
-                   <property name="leftMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="topMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>0</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QFrame" name="horizontalFrame">
-                     <property name="styleSheet">
-                      <string notr="true">border: 5px soild black;</string>
-                     </property>
-                     <layout class="QHBoxLayout" name="horizontalLayout_2">
-                      <item>
-                       <widget class="QTreeWidget" name="robotTree">
-                        <property name="styleSheet">
-                         <string notr="true"/>
-                        </property>
-                        <column>
-                         <property name="text">
-                          <string>Robot</string>
-                         </property>
-                        </column>
-                        <column>
-                         <property name="text">
-                          <string>Value</string>
-                         </property>
-                        </column>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="createRobotJsonButton">
-                  <property name="text">
-                   <string>Create robot JSON</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="loadRobotJsonButton">
-                  <property name="text">
-                   <string>Load robot JSON</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="robotsLabel">
-                  <property name="text">
-                   <string>File is not selected</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QFrame" name="horizontalFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="createPolygonObjBttn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Create object</string>
+               </property>
               </widget>
-              <widget class="QWidget" name="tab_4">
-               <attribute name="title">
-                <string>Team creating</string>
-               </attribute>
-               <layout class="QGridLayout" name="gridLayout_12">
-                <item row="0" column="1">
-                 <widget class="QFrame" name="gridFrame_4">
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeSelectedObjBttn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                 <horstretch>2</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Remove selected object</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeAllObjBttn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Remove all</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>100</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QFrame" name="horizontalFrame">
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <widget class="QLineEdit" name="fieldWidthLineEdit">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>6</horstretch>
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="styleSheet">
-                   <string notr="true">border: 5px solid grey;</string>
+                  <property name="placeholderText">
+                   <string>Field width in m</string>
                   </property>
-                  <layout class="QGridLayout" name="gridLayout_13">
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="fieldHeightLineEdit">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="placeholderText">
+                   <string>Field height in m</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_4">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Update</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_7">
+         <attribute name="title">
+          <string>Robot creating</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_21">
+          <item row="0" column="0">
+           <widget class="QFrame" name="horizontalFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="createRobotBttn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Create robot</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeSelectedRobotsBttn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Remove selected robot</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeAllRobotsBttn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Remove all</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>100</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QFrame" name="horizontalFrame_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>13</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 5px solid grey;</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QTreeWidget" name="robotTree">
+               <property name="styleSheet">
+                <string notr="true">border: 0px;</string>
+               </property>
+               <column>
+                <property name="text">
+                 <string>Robot</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Value</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_8">
+         <attribute name="title">
+          <string>Team creating</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_22">
+          <item row="0" column="1">
+           <widget class="QFrame" name="horizontalFrame">
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QFrame" name="verticalFrame">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>2</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_9">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QFrame" name="horizontalFrame">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>1</horstretch>
+                    <verstretch>1</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_11">
                    <property name="leftMargin">
                     <number>0</number>
                    </property>
@@ -228,53 +474,94 @@
                    <property name="bottomMargin">
                     <number>0</number>
                    </property>
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QFrame" name="horizontalFrame">
+                   <item>
+                    <widget class="QPushButton" name="createTeamBttn">
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>5</horstretch>
+                      <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
                      <property name="styleSheet">
-                      <string notr="true">border: 5px soild black;</string>
+                      <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
                      </property>
-                     <layout class="QHBoxLayout" name="horizontalLayout_6">
-                      <item>
-                       <widget class="QTreeWidget" name="playerTree">
-                        <column>
-                         <property name="text">
-                          <string>Player</string>
-                         </property>
-                        </column>
-                        <column>
-                         <property name="text">
-                          <string>Value</string>
-                         </property>
-                        </column>
-                       </widget>
-                      </item>
-                     </layout>
+                     <property name="text">
+                      <string>Create team</string>
+                     </property>
                     </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="removeSelectedTeamBttn">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+                     </property>
+                     <property name="text">
+                      <string>Remove selected team</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="removeAllTeamsBttn">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+                     </property>
+                     <property name="text">
+                      <string>Remove all</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="horizontalSpacer_3">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Minimum</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
                    </item>
                   </layout>
                  </widget>
                 </item>
-                <item row="0" column="0">
-                 <widget class="QFrame" name="gridFrame_3">
+                <item>
+                 <widget class="QFrame" name="verticalFrame_4">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-                    <horstretch>3</horstretch>
-                    <verstretch>0</verstretch>
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>1</horstretch>
+                    <verstretch>12</verstretch>
                    </sizepolicy>
                   </property>
                   <property name="styleSheet">
                    <string notr="true">border: 5px solid grey;</string>
                   </property>
-                  <layout class="QGridLayout" name="gridLayout_10">
+                  <layout class="QVBoxLayout" name="verticalLayout_13">
                    <property name="leftMargin">
                     <number>0</number>
                    </property>
@@ -287,64 +574,193 @@
                    <property name="bottomMargin">
                     <number>0</number>
                    </property>
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QFrame" name="horizontalFrame">
+                   <item>
+                    <widget class="QTreeWidget" name="teamTree">
                      <property name="styleSheet">
-                      <string notr="true">border: 5px soild black;</string>
+                      <string notr="true">border: 0px;</string>
                      </property>
-                     <layout class="QHBoxLayout" name="horizontalLayout_3">
-                      <item>
-                       <widget class="QTreeWidget" name="teamTree">
-                        <column>
-                         <property name="text">
-                          <string>Team</string>
-                         </property>
-                        </column>
-                        <column>
-                         <property name="text">
-                          <string>Value</string>
-                         </property>
-                        </column>
-                       </widget>
-                      </item>
-                     </layout>
+                     <column>
+                      <property name="text">
+                       <string>Team</string>
+                      </property>
+                     </column>
+                     <column>
+                      <property name="text">
+                       <string>Value</string>
+                      </property>
+                     </column>
                     </widget>
                    </item>
                   </layout>
                  </widget>
                 </item>
-                <item row="2" column="0" colspan="2">
-                 <widget class="QPushButton" name="loadTeamJsonButton">
-                  <property name="text">
-                   <string>Load team's JSON</string>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="verticalFrame_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>3</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0,0">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QFrame" name="horizontalFrame">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>1</horstretch>
+                    <verstretch>1</verstretch>
+                   </sizepolicy>
                   </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_13">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QPushButton" name="createPlayerBttn">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+                     </property>
+                     <property name="text">
+                      <string>Create player</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="removeSelectedPlayerBttn">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+                     </property>
+                     <property name="text">
+                      <string>Remove selected player</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="removeAllPlayersBttn">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">QPushButton {
+	padding-left: 20px;
+	padding-right: 20px;
+}</string>
+                     </property>
+                     <property name="text">
+                      <string>Remove all</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="horizontalSpacer_4">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                  </layout>
                  </widget>
                 </item>
-                <item row="1" column="0" colspan="2">
-                 <widget class="QPushButton" name="createTeamJsonButton">
-                  <property name="text">
-                   <string>Create team's JSON</string>
+                <item>
+                 <widget class="QFrame" name="verticalFrame_6">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>1</horstretch>
+                    <verstretch>12</verstretch>
+                   </sizepolicy>
                   </property>
-                 </widget>
-                </item>
-                <item row="3" column="0" colspan="2">
-                 <widget class="QLabel" name="teamsLabel">
-                  <property name="text">
-                   <string>File is not selected</string>
+                  <property name="styleSheet">
+                   <string notr="true">border: 5px solid grey;</string>
                   </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_15">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QTreeWidget" name="playerTree">
+                     <property name="styleSheet">
+                      <string notr="true">border: 0px;</string>
+                     </property>
+                     <column>
+                      <property name="text">
+                       <string>Player</string>
+                      </property>
+                     </column>
+                     <column>
+                      <property name="text">
+                       <string>Value</string>
+                      </property>
+                     </column>
+                    </widget>
+                   </item>
+                  </layout>
                  </widget>
                 </item>
                </layout>
               </widget>
-             </widget>
-            </item>
-           </layout>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -643,12 +1059,121 @@
           <string>Visualize</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_14">
+          <item row="1" column="0">
+           <widget class="QFrame" name="">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>13</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 5px solid grey;</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_11">
+             <item row="0" column="0">
+              <widget class="QGraphicsView" name="graphicsView">
+               <property name="styleSheet">
+                <string notr="true">border: 0px;</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_11">
-            <item row="0" column="0">
-             <widget class="QGraphicsView" name="graphicsView"/>
-            </item>
-           </layout>
+           <widget class="QFrame" name="horizontalFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="pushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 30px;
+	padding-right: 30px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Start game</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 30px;
+	padding-right: 30px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Restart game</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-left: 30px;
+	padding-right: 30px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Stop game</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -663,7 +1188,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1022</width>
+     <width>1033</width>
      <height>22</height>
     </rect>
    </property>
@@ -680,8 +1205,19 @@
     </widget>
     <addaction name="menuLanguage"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="saveAsAct"/>
+    <addaction name="openPolygonCfgAct"/>
+    <addaction name="openRobotCfgAct"/>
+    <addaction name="openTeamCfgAct"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionRussian">
    <property name="text">
     <string>Russian</string>
@@ -690,6 +1226,26 @@
   <action name="actionEnglish">
    <property name="text">
     <string>English</string>
+   </property>
+  </action>
+  <action name="saveAsAct">
+   <property name="text">
+    <string>Save current as</string>
+   </property>
+  </action>
+  <action name="openPolygonCfgAct">
+   <property name="text">
+    <string>Open polygon config</string>
+   </property>
+  </action>
+  <action name="openRobotCfgAct">
+   <property name="text">
+    <string>Open robot's config</string>
+   </property>
+  </action>
+  <action name="openTeamCfgAct">
+   <property name="text">
+    <string>Open team's config</string>
    </property>
   </action>
  </widget>

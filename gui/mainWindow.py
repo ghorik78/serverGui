@@ -1,22 +1,26 @@
 import configparser
 import json
 
-import numpy as np
+from database.database import *
 
 from utils.templates import *
 from utils.localization import *
 
 from classes.dataclasses import *
 
+from gui.playerRoleWindow import PlayerRoleWindow
+from gui.polygonRoleWindow import PolygonRoleWindow
 from gui.filterWindow import FilterWindow
 from gui.robotWindow import RobotWindow
 
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from matplotlib.image import imread
+from matplotlib.image import imread, imsave
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
+from scipy import ndimage
 
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget, QGraphicsView, QGraphicsScene, \
@@ -40,40 +44,48 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onInit()
 
     def onInit(self):
+        # Roles
+        self.objectRolesDict = createObjectRolesDict()
+        self.playerRolesDict = createPlayerRolesDict()
+
         # localization
         self.currentLocale = 'EN'
         self.config = configparser.ConfigParser()
         self.config.read(f'locales/{self.currentLocale}.ini', encoding='utf-8')
 
         #  Menu action
-        self.actionRussian = self.findChild(QAction, 'actionRussian')
         self.actionRussian.triggered.connect(self.translateToRUS)
-
-        self.actionEnglish = self.findChild(QAction, 'actionEnglish')
         self.actionEnglish.triggered.connect(self.translateToEN)
 
+        self.saveAsAct.triggered.connect(self.saveAs)
+        self.openPolygonCfgAct.triggered.connect(self.loadPolygonJSON)
+        self.openRobotCfgAct.triggered.connect(self.loadRobotJSON)
+        self.openTeamCfgAct.triggered.connect(self.loadTeamJSON)
+
         # Tree widgets
-        self.robotTree = self.findChild(QTreeWidget, 'robotTree')
         self.robotTree.itemClicked.connect(self.robotTreeItemClickTrigger)
-
-        self.teamTree = self.findChild(QTreeWidget, 'teamTree')  # list of teams
         self.teamTree.itemClicked.connect(self.teamTreeItemClickTrigger)
-
-        self.playerTree = self.findChild(QTreeWidget, 'playerTree')  # list of players
         self.playerTree.itemDoubleClicked.connect(self.playerTreeDoubleClickTrigger)
         self.playerTree.itemClicked.connect(self.playerTreeItemClickTrigger)
-
-        self.objectTree = self.findChild(QTreeWidget, 'objectTree')
         self.objectTree.itemDoubleClicked.connect(self.objectTreeDoubleClickTrigger)
         self.objectTree.itemClicked.connect(self.objectTreeItemClickTrigger)
 
         # Buttons
-        self.createPolygonJsonButton.clicked.connect(self.createPolygonJSON)
-        self.loadPolygonJsonButton.clicked.connect(self.loadPolygonJSON)
-        self.createRobotJsonButton.clicked.connect(self.createRobotJSON)
-        self.loadRobotJsonButton.clicked.connect(self.loadRobotJSON)
-        self.createTeamJsonButton.clicked.connect(self.createTeamJSON)
-        self.loadTeamJsonButton.clicked.connect(self.loadTeamJSON)
+        self.createPolygonObjBttn.clicked.connect(self.createNewObject)
+        self.removeSelectedObjBttn.clicked.connect(self.removeObject)
+        self.removeAllObjBttn.clicked.connect(self.removeAllObjects) # to do
+
+        self.createRobotBttn.clicked.connect(self.createNewRobot)
+        self.removeSelectedRobotsBttn.clicked.connect(self.removeRobot)
+        self.removeAllRobotsBttn.clicked.connect(self.removeAllRobots)
+
+        self.createTeamBttn.clicked.connect(self.createNewTeam)
+        self.removeSelectedTeamBttn.clicked.connect(self.removeTeam)
+        self.removeAllTeamsBttn.clicked.connect(self.removeAllTeams)
+
+        self.createPlayerBttn.clicked.connect(self.createNewPlayer)
+        self.removeSelectedPlayerBttn.clicked.connect(self.removePlayer)
+        self.removeAllPlayersBttn.clicked.connect(self.removeALlPlayers)
 
         self.sendJsonButton.clicked.connect(self.sendJson)
         self.createGameButton.clicked.connect(self.createGame)
@@ -92,6 +104,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphicsView = self.findChild(QGraphicsView, 'graphicsView')
         self.graphicsScene = QGraphicsScene()
         self.graphicsView.setScene(self.graphicsScene)
+
+        self.polygonGraphicsScene = QGraphicsScene()
+        self.polygonGraphicsView.setScene(self.polygonGraphicsScene)
 
         # Client-server
         self.serverAddr = ''
@@ -154,6 +169,22 @@ class MainWindow(QtWidgets.QMainWindow):
         canvas = FigureCanvas(fig)
         plt.close()  # Close for optimization
         self.graphicsScene.addWidget(canvas)
+
+    def updatePolygonPlots(self):
+        self.polygonGraphicsScene.clear()
+        if self.externalTab.currentIndex() != 0:
+            return
+
+        startPlace = imread('images/startPlace.png')
+        startPlaceRL = ndimage.rotate(startPlace, 90)
+        imsave('test.png', startPlaceRL)
+        fig, ax = plt.subplots()
+
+        try:
+            plt.xlim([-1.0, float(self.fieldWidthLineEdit.text()) + 1.0])
+            plt.ylim([-1.0, float(self.fieldHeightLineEdit.text()) + 1.0])
+        except ValueError:
+            self.showWarning(self.config.get('LOCALE', ''))
 
     def updateState(self):
         if self.externalTab.currentIndex() != 1:
@@ -242,6 +273,10 @@ class MainWindow(QtWidgets.QMainWindow):
         playerList.append([])
 
     def createNewPlayer(self):
+        self.setUnselected(self.playerTree.selectedItems())
+        self.playerRolesWindow = PlayerRoleWindow(self)
+        self.playerRolesWindow.show()
+
         if not self.teamTree.invisibleRootItem().childCount():
             return
 
@@ -252,19 +287,25 @@ class MainWindow(QtWidgets.QMainWindow):
             newFieldItem = QTreeWidgetItem()
             newFieldItem.setText(0, field)
             newFieldItem.setText(1, str(defaultPlayer.__dict__.get(field)))
+            newFieldItem.setToolTip(1, self.config.get('LOCALE', 'objectToolTip'))
             newPlayer.addChild(newFieldItem)
 
             if field in PLAYER_CUSTOM_FIELDS:
                 self.playerTree.setItemWidget(newFieldItem, 1, createComboBoxSubwidget(self.width() // 5,
                                                                                        PlayerParams.aliases.get(field)))
 
-        newPlayer.setText(0, 'New player')
-
         self.playerTree.addTopLevelItems([newPlayer])
+
+        newPlayer.setText(0, 'New player')
+        newPlayer.setSelected(True)
 
         playerList[self.currentTeamIndex].append(newPlayer)
 
     def createNewObject(self):
+        self.setUnselected(self.objectTree.selectedItems())
+        self.polygonRolesWindow = PolygonRoleWindow(self)
+        self.polygonRolesWindow.show()
+
         newObject = QTreeWidgetItem()
         defaultObject = ObjectParams()
 
@@ -272,11 +313,13 @@ class MainWindow(QtWidgets.QMainWindow):
             newFieldItem = QTreeWidgetItem()
             newFieldItem.setText(0, field)
             newFieldItem.setText(1, str(defaultObject.__dict__.get(field)))
+            newFieldItem.setToolTip(1, self.config.get('LOCALE', 'objectToolTip'))
             newObject.addChild(newFieldItem)
 
-        newObject.setText(0, 'New object')
-
         self.objectTree.addTopLevelItems([newObject])
+
+        newObject.setText(0, 'New object')
+        newObject.setSelected(True)
 
     # Removing methods
     def removeRobot(self):
@@ -284,6 +327,18 @@ class MainWindow(QtWidgets.QMainWindow):
         for item in self.robotTree.selectedItems():
             (item.parent() or root).removeChild(item)
         self.isRobotSelected = False
+
+    def removeAllRobots(self):
+        reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
+                              self.config.get('LOCALE', 'robotsRemoveText'))
+
+        if reply == QMessageBox.No:
+            return
+
+        root = self.robotTree.invisibleRootItem()
+        children = [root.child(i) for i in range(root.childCount())]
+        for child in children:
+            root.removeChild(child)
 
     def removeTeam(self):
         root = self.teamTree.invisibleRootItem()
@@ -309,11 +364,50 @@ class MainWindow(QtWidgets.QMainWindow):
         except AttributeError:  # if last item was removed
             pass
 
+    def removeAllTeams(self):
+        reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
+                              self.config.get('LOCALE', 'teamsRemoveText'))
+
+        if reply == QMessageBox.No:
+            return
+
+        root = self.teamTree.invisibleRootItem()
+        children = [root.child(i) for i in range(root.childCount())]
+        for child in children:
+            root.removeChild(child)
+
+        teamList.clear()
+        self.removeAllPlayersReinterpret()
+
     def removePlayer(self):
         root = self.playerTree.invisibleRootItem()
         for item in self.playerTree.selectedItems():
             (item.parent() or root).removeChild(item)
         self.isPlayerSelected = False
+
+    def removeALlPlayers(self):
+        reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
+                              self.config.get('LOCALE', 'playersRemoveText'))
+
+        if reply == QMessageBox.No:
+            return
+
+        root = self.playerTree.invisibleRootItem()
+        selectedTeam = self.teamTree.selectedItems()[0]
+        selectedTeamIdx = teamList.index(selectedTeam)
+        children = playerList[selectedTeamIdx]
+
+        # [1, 2, 3, 3, 4] -> [1, 2, 3, 4] if you try to remove 3 in straight order
+        for i in range(len(children)-1, -1, -1):
+            root.removeChild(children[i])
+            playerList[selectedTeamIdx].remove(children[i])
+
+    def removeAllPlayersReinterpret(self):
+        root = self.playerTree.invisibleRootItem()
+        children = [root.child(i) for i in range(root.childCount())]
+        for child in children:
+            root.removeChild(child)
+        playerList.clear()
 
     def removeObject(self):
         root = self.objectTree.invisibleRootItem()
@@ -321,7 +415,35 @@ class MainWindow(QtWidgets.QMainWindow):
             (item.parent() or root).removeChild(item)
         self.isObjectSelected = False
 
+    def removeAllObjects(self):
+        reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
+                              self.config.get('LOCALE', 'objectsRemoveText'))
+
+        if reply == QMessageBox.No:
+            return
+
+        root = self.objectTree.invisibleRootItem()
+        children = [root.child(i) for i in range(root.childCount())]
+        for child in children:
+            root.removeChild(child)
+
     # Triggers
+    def saveAs(self):
+        """
+        Saves JSON of the current tab.
+        :return: None
+        """
+        outputPath = getOutputPath(self, self.config.get("LOCALE", "getOutputPath"))
+        if not outputPath:
+            return
+
+        if self.externalTab.currentIndex() == 0:
+            self.createPolygonJSON(outputPath)
+        elif self.externalTab.currentIndex() == 1:
+            self.createRobotJSON(outputPath)
+        else:
+            self.createTeamJSON(outputPath)
+
     def robotTreeItemClickTrigger(self, item, col):
         self.isRobotSelected = True
         item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable) if (col == 0) and item.childCount() \
@@ -371,8 +493,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateServerAddress(self):
         self.serverAddr = f"http://{self.hostnameLineEdit.text()}:{self.portLineEdit.text()}/"
 
-    # Button controllers
-    def createPolygonJSON(self):
+    # Actions
+    def createPolygonJSON(self, outputPath):
         polygonParams = PolygonParams([])
         root = self.objectTree.invisibleRootItem()
         objectList = [root.child(i) for i in range(root.childCount())]
@@ -381,9 +503,9 @@ class MainWindow(QtWidgets.QMainWindow):
             dataclassPolygonObject = dataclassFromWidget(obj, ObjectParams(), self.objectTree)
             polygonParams.objects.append(dataclassPolygonObject)
 
-        saveToFile('json/polygon.json', json.dumps(dataclasses.asdict(polygonParams), indent=2))
+        saveToFile(f'{outputPath}/polygon.json', json.dumps(dataclasses.asdict(polygonParams), indent=2))
 
-    def createRobotJSON(self):
+    def createRobotJSON(self, outputPath):
         robotDataclass = Robots([])
         root = self.robotTree.invisibleRootItem()
         objectList = [root.child(i) for i in range(root.childCount())]
@@ -392,11 +514,10 @@ class MainWindow(QtWidgets.QMainWindow):
             dataclassRobotFromWidget = dataclassFromWidget(obj, RobotParams(), self.robotTree)
             robotDataclass.robotList.append(dataclassRobotFromWidget)
 
-        saveToFile('json/robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
+        saveToFile(f'{outputPath}/robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
 
-    def createTeamJSON(self):
+    def createTeamJSON(self, outputPath):
         gameDataclass = Game([])
-
         root = self.teamTree.invisibleRootItem()
 
         for i in range(root.childCount()):
@@ -409,7 +530,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             gameDataclass.teams.append(teamDataclass)
 
-        saveToFile('json/players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
+        saveToFile(f'{outputPath}/players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
 
     def loadPolygonJSON(self):
         """Loads Polygon's dataclass from the JSON file"""
@@ -419,8 +540,10 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             polygon = PolygonParams(**readJSON(filepath))
             polygon.objects = serializeChildren(polygon.objects, ObjectParams)
-            fillObjectTree(polygon, self.objectTree)
-            self.polygonLabel.setText(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}")
+            fillObjectTree(polygon, self.objectTree, self.config)
+
+            self.statusBar.showMessage(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}", 10000)
+            self.externalTab.setCurrentIndex(0)
             self.isPolygonJsonSelected = True
         except TypeError:  # if file selecting was cancelled
             pass
@@ -434,7 +557,8 @@ class MainWindow(QtWidgets.QMainWindow):
             robots = Robots(**readJSON(filepath))
             robots.robotList = serializeChildren(robots.robotList, RobotParams)
             fillRobotTree(robots, self.robotTree)
-            self.robotsLabel.setText(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}")
+            self.statusBar.showMessage(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}", 10000)
+            self.externalTab.setCurrentIndex(1)
             self.isRobotsJsonSelected = True
         except TypeError:
             pass
@@ -452,15 +576,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 team.players = serializeChildren(team.players, PlayerParams)
 
             fillGameTree(game, self.teamTree, self.playerTree)
-            self.teamsLabel.setText(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}")
+            self.statusBar.showMessage(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}", 10000)
+            self.externalTab.setCurrentIndex(2)
             self.isTeamsJsonSelected = True
         except TypeError:
             pass
 
+    # Button controllers
     def sendJson(self):
         """
         Sends JSON file(-s) to the http server.
-
         If you want to send tab's json file, make sure that it was loaded and still in the directory.
         """
 
@@ -623,6 +748,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isTeamSelected = False
         self.isPlayerSelected = False
 
+    def setUnselected(self, selectedItems: list):
+        for item in selectedItems:
+            item.setSelected(False)
+
     def translateToRUS(self):
         self.currentLocale = 'RU'
         translateToRUS(self, 0)
@@ -630,6 +759,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def translateToEN(self):
         self.currentLocale = 'EN'
         translateToEN(self, 0)
+
+    def getReply(self, title, text):
+        return QMessageBox.question(self, title, text, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
     def showWarning(self, message: str):
         msg = QMessageBox()

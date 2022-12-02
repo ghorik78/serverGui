@@ -46,7 +46,7 @@ class FilterWindow(QWidget):
 
             currFilter = self.object_filter.text(1)
 
-            # Don't do anything if playing has already selected
+            # Don't do anything if player has already selected
             if f'{team_ind}, {player_ind}' in self.object_filter.text(1):
                 return
 
