@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1033</width>
-    <height>615</height>
+    <width>947</width>
+    <height>577</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <item>
        <widget class="QTabWidget" name="externalTab">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
@@ -164,7 +164,7 @@
               <widget class="QPushButton" name="removeSelectedObjBttn">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
-                 <horstretch>2</horstretch>
+                 <horstretch>1</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
@@ -208,7 +208,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>100</width>
+                 <width>20</width>
                  <height>20</height>
                 </size>
                </property>
@@ -216,47 +216,7 @@
              </item>
              <item>
               <widget class="QFrame" name="horizontalFrame">
-               <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                 <widget class="QLineEdit" name="fieldWidthLineEdit">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="placeholderText">
-                   <string>Field width in m</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="fieldHeightLineEdit">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="placeholderText">
-                   <string>Field height in m</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_4">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Update</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <layout class="QHBoxLayout" name="horizontalLayout_2"/>
               </widget>
              </item>
             </layout>
@@ -778,13 +738,23 @@
              </sizepolicy>
             </property>
             <layout class="QGridLayout" name="gridLayout_4">
-             <item row="5" column="1">
-              <widget class="QLineEdit" name="portLineEdit">
-               <property name="text">
-                <string>5555</string>
+             <item row="6" column="0">
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
                </property>
-               <property name="placeholderText">
-                <string>Port</string>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="2" column="0">
+              <widget class="QPushButton" name="startGameButton">
+               <property name="text">
+                <string>Start game</string>
                </property>
               </widget>
              </item>
@@ -802,26 +772,6 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QPushButton" name="startGameButton">
-               <property name="text">
-                <string>Start game</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="0">
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
              <item row="4" column="0">
               <widget class="QPushButton" name="stopGameButton">
                <property name="text">
@@ -829,34 +779,13 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="delayComboBox">
-               <item>
-                <property name="text">
-                 <string>Delay 0</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Delay 15</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Delay 30</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Delay 60</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="createGameButton">
+             <item row="5" column="0" colspan="2">
+              <widget class="QLabel" name="statusLabel">
                <property name="text">
-                <string>Create game</string>
+                <string>TextLabel</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -889,23 +818,34 @@
                </item>
               </widget>
              </item>
-             <item row="5" column="0">
-              <widget class="QLineEdit" name="hostnameLineEdit">
-               <property name="text">
-                <string>127.0.0.1</string>
-               </property>
-               <property name="placeholderText">
-                <string>Host</string>
-               </property>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="delayComboBox">
+               <item>
+                <property name="text">
+                 <string>Delay 0</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Delay 15</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Delay 30</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Delay 60</string>
+                </property>
+               </item>
               </widget>
              </item>
-             <item row="6" column="0" colspan="2">
-              <widget class="QLabel" name="statusLabel">
+             <item row="1" column="0">
+              <widget class="QPushButton" name="createGameButton">
                <property name="text">
-                <string>TextLabel</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <string>Create game</string>
                </property>
               </widget>
              </item>
@@ -1060,7 +1000,7 @@
          </attribute>
          <layout class="QGridLayout" name="gridLayout_14">
           <item row="1" column="0">
-           <widget class="QFrame" name="">
+           <widget class="QFrame" name="frame">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -1188,7 +1128,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1033</width>
+     <width>947</width>
      <height>22</height>
     </rect>
    </property>
@@ -1204,6 +1144,7 @@
      <addaction name="actionEnglish"/>
     </widget>
     <addaction name="menuLanguage"/>
+    <addaction name="actionSocketSettings"/>
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -1246,6 +1187,11 @@
   <action name="openTeamCfgAct">
    <property name="text">
     <string>Open team's config</string>
+   </property>
+  </action>
+  <action name="actionSocketSettings">
+   <property name="text">
+    <string>Socket settings</string>
    </property>
   </action>
  </widget>

@@ -4,7 +4,7 @@ import typing
 import dataclasses
 
 PLAYER_CUSTOM_FIELDS = []  # combo box will be created for these fields
-ROBOT_CUSTOM_FIELDS = ['control_obj']
+ROBOT_CUSTOM_FIELDS = []
 
 
 @dataclasses.dataclass
@@ -12,7 +12,6 @@ class RobotParams:
     aliases = dict(control_obj=CONTROL_OBJECTS)
 
     title: str = "New robot"
-    control_obj: str = ""
     ip: str = "127.0.0.1"
     port: int = 0
 
@@ -53,7 +52,6 @@ OBJECT_CUSTOM_FIELDS = []
 @dataclasses.dataclass
 class ObjectParams:
     title: str = "New object"
-    role: str = "role not set"
     position: list = (0, 0, 0)
     ind_for_led_controller: int = 0
     custom_settings: str = ""

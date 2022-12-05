@@ -8,10 +8,12 @@ from utils.localization import *
 
 from classes.dataclasses import *
 
+from gui.robotCreatingWindow import RobotCreatingWindow
 from gui.playerRoleWindow import PlayerRoleWindow
 from gui.polygonRoleWindow import PolygonRoleWindow
 from gui.filterWindow import FilterWindow
 from gui.robotWindow import RobotWindow
+from gui.socketSettingsWindow import SocketSettingsWindow
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -44,23 +46,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.onInit()
 
     def onInit(self):
-        # Roles
-        self.objectRolesDict = createObjectRolesDict()
-        self.playerRolesDict = createPlayerRolesDict()
-
+        """
+        This method will initialize all mainWindow children.
+        EN locale will be set as default.
+        """
         # localization
         self.currentLocale = 'EN'
         self.config = configparser.ConfigParser()
         self.config.read(f'locales/{self.currentLocale}.ini', encoding='utf-8')
 
-        #  Menu action
-        self.actionRussian.triggered.connect(self.translateToRUS)
+        # Roles
+        self.objectRolesDict = createObjectRolesDict(self.currentLocale)
+        self.playerRolesDict = createPlayerRolesDict(self.currentLocale)
+
+        # Menu action
+        self.actionRussian.triggered.connect(self.translateToRU)
         self.actionEnglish.triggered.connect(self.translateToEN)
 
         self.saveAsAct.triggered.connect(self.saveAs)
         self.openPolygonCfgAct.triggered.connect(self.loadPolygonJSON)
         self.openRobotCfgAct.triggered.connect(self.loadRobotJSON)
         self.openTeamCfgAct.triggered.connect(self.loadTeamJSON)
+
+        self.actionSocketSettings.triggered.connect(self.changeSocketSettings)
 
         # Tree widgets
         self.robotTree.itemClicked.connect(self.robotTreeItemClickTrigger)
@@ -73,7 +81,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Buttons
         self.createPolygonObjBttn.clicked.connect(self.createNewObject)
         self.removeSelectedObjBttn.clicked.connect(self.removeObject)
-        self.removeAllObjBttn.clicked.connect(self.removeAllObjects) # to do
+        self.removeAllObjBttn.clicked.connect(self.removeAllObjects)
 
         self.createRobotBttn.clicked.connect(self.createNewRobot)
         self.removeSelectedRobotsBttn.clicked.connect(self.removeRobot)
@@ -96,11 +104,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # ComboBoxes
         self.jsonSelectingComboBox.currentIndexChanged.connect(self.sendJson)
 
-        # LineEdits
-        self.hostnameLineEdit.textChanged.connect(self.updateServerAddress)
-        self.portLineEdit.textChanged.connect(self.updateServerAddress)
-
         # Graphics
+        self.fieldWidthLimits = [-3.0 * 0.1, 3.0]
+        self.fieldHeightLimits = [-3.0 * 0.1, 3.0]
+
         self.graphicsView = self.findChild(QGraphicsView, 'graphicsView')
         self.graphicsScene = QGraphicsScene()
         self.graphicsView.setScene(self.graphicsScene)
@@ -109,8 +116,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.polygonGraphicsView.setScene(self.polygonGraphicsScene)
 
         # Client-server
+        self.hostname = ''
+        self.port = ''
         self.serverAddr = ''
         self.session = requests.session()
+
+        # Vars for indexing
+        self.totalCreated = dict()
 
         # flags for item removing
         self.isRobotSelected = False
@@ -122,9 +134,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isPolygonJsonSelected = False
         self.isRobotsJsonSelected = False
         self.isTeamsJsonSelected = False
-
-        # flags for game preparing
-        self.isReadyToCreate = False
 
         # timers for plots
         self.plotTimer = QtCore.QTimer()
@@ -141,8 +150,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filesSent = []
         self.currentTeamIndex = 0
 
-        self.addContextMenus()
+
         self.translateToEN()
+        self.addContextMenus()
+
+        self.objectTree.itemChanged.connect(self.posChanged)
 
     def updatePlots(self):
         self.graphicsScene.clear()
@@ -172,19 +184,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def updatePolygonPlots(self):
         self.polygonGraphicsScene.clear()
+
         if self.externalTab.currentIndex() != 0:
             return
 
-        startPlace = imread('images/startPlace.png')
-        startPlaceRL = ndimage.rotate(startPlace, 90)
-        imsave('test.png', startPlaceRL)
         fig, ax = plt.subplots()
+        fig.set_figheight(4.25)
+        fig.set_figwidth(4.25)
+        ax.set_aspect(1)
+
+        root = self.objectTree.invisibleRootItem()
+        children = [root.child(i) for i in range(root.childCount())]
 
         try:
-            plt.xlim([-1.0, float(self.fieldWidthLineEdit.text()) + 1.0])
-            plt.ylim([-1.0, float(self.fieldHeightLineEdit.text()) + 1.0])
-        except ValueError:
-            self.showWarning(self.config.get('LOCALE', ''))
+            for child in children:
+                role = removeDigitsFromStr(child.text(0))
+                position = listFromStr(child.child(getFieldIndex(child, 'position')).text(1))
+                ax.add_artist(createFigureByRole(self.currentLocale, role, position[0:2]))
+                self.updateFieldLimits(position)
+        except AttributeError:
+            pass
+
+        canvas = FigureCanvas(fig)
+
+        plt.grid(True)
+        plt.xlim(self.fieldWidthLimits)
+        plt.ylim(self.fieldHeightLimits)
+        plt.close()
+
+        self.polygonGraphicsScene.addWidget(canvas)
 
     def updateState(self):
         if self.externalTab.currentIndex() != 1:
@@ -240,6 +268,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Creating methods
     def createNewRobot(self):
+        self.setUnselected(self.robotTree.selectedItems())
         newRobot = QTreeWidgetItem()
         defaultRobot = RobotParams()
 
@@ -253,10 +282,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.robotTree.setItemWidget(newFieldItem, 1, createComboBoxSubwidget(self.width() // 5,
                                                                                       RobotParams.aliases.get(field)))
 
-        newRobot.setText(0, 'New robot')
         self.robotTree.addTopLevelItems([newRobot])
 
+        newRobot.setText(0, 'New robot')
+        newRobot.setSelected(True)
+
+        self.robotCreatingWindow = RobotCreatingWindow(self)
+        self.robotCreatingWindow.exec()
+
     def createNewTeam(self):
+        self.setUnselected(self.teamTree.selectedItems())
         newTeam = QTreeWidgetItem()
         defaultTeam = TeamParams([])
 
@@ -303,8 +338,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def createNewObject(self):
         self.setUnselected(self.objectTree.selectedItems())
-        self.polygonRolesWindow = PolygonRoleWindow(self)
-        self.polygonRolesWindow.show()
 
         newObject = QTreeWidgetItem()
         defaultObject = ObjectParams()
@@ -318,13 +351,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.objectTree.addTopLevelItems([newObject])
 
-        newObject.setText(0, 'New object')
+        newObject.setText(0, "New object")
         newObject.setSelected(True)
+
+        self.polygonRolesWindow = PolygonRoleWindow(self)
+        self.polygonRolesWindow.exec()
 
     # Removing methods
     def removeRobot(self):
         root = self.robotTree.invisibleRootItem()
         for item in self.robotTree.selectedItems():
+            if not item.childCount():
+                continue
             (item.parent() or root).removeChild(item)
         self.isRobotSelected = False
 
@@ -343,6 +381,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def removeTeam(self):
         root = self.teamTree.invisibleRootItem()
         for item in self.teamTree.selectedItems():
+            if not item.childCount():
+                continue
+
             # removing items from gui
             (item.parent() or root).removeChild(item)
 
@@ -382,6 +423,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def removePlayer(self):
         root = self.playerTree.invisibleRootItem()
         for item in self.playerTree.selectedItems():
+            if not item.childCount():
+                continue
             (item.parent() or root).removeChild(item)
         self.isPlayerSelected = False
 
@@ -412,8 +455,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def removeObject(self):
         root = self.objectTree.invisibleRootItem()
         for item in self.objectTree.selectedItems():
+            if not item.childCount():
+                continue
             (item.parent() or root).removeChild(item)
         self.isObjectSelected = False
+
+        self.updatePolygonPlots()
 
     def removeAllObjects(self):
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
@@ -427,10 +474,13 @@ class MainWindow(QtWidgets.QMainWindow):
         for child in children:
             root.removeChild(child)
 
+        self.updatePolygonPlots()
+
     # Triggers
     def saveAs(self):
         """
         Saves JSON of the current tab.
+        Dialog window with path selecting will be shown.
         :return: None
         """
         outputPath = getOutputPath(self, self.config.get("LOCALE", "getOutputPath"))
@@ -490,11 +540,39 @@ class MainWindow(QtWidgets.QMainWindow):
             self.filterWindow = FilterWindow(self, item)
             self.filterWindow.show()
 
+    def posChanged(self):
+        """
+        Updates polygon plots when position field has changed.
+        """
+        self.updatePolygonPlots()
+
+    def updateFieldLimits(self, newPos: list):
+        """
+        Updates field limits for the most correct drawing.
+        Make sure that position coords is positive.
+        :param newPos: list
+        :return: None
+        """
+        self.fieldWidthLimits = [min(-newPos[1] * 0.1, self.fieldWidthLimits[0]), self.fieldWidthLimits[1]]
+        self.fieldWidthLimits = [self.fieldWidthLimits[0], max(newPos[0] * 1.1, self.fieldWidthLimits[1])]
+        self.fieldHeightLimits = [min(-newPos[0] * 0.1, self.fieldHeightLimits[0]), self.fieldHeightLimits[1]]
+        self.fieldHeightLimits = [self.fieldHeightLimits[0], max(newPos[1] * 1.1, self.fieldHeightLimits[1])]
+
     def updateServerAddress(self):
-        self.serverAddr = f"http://{self.hostnameLineEdit.text()}:{self.portLineEdit.text()}/"
+        """
+        Updates server address.
+        :return: None
+        """
+        self.serverAddr = f"http://{self.hostname}:{self.port}/"
 
     # Actions
     def createPolygonJSON(self, outputPath):
+        """
+        Creates a JSON file using polygon dataclasses.
+        The input data takes from the tree.
+        :param outputPath: string
+        :return: None
+        """
         polygonParams = PolygonParams([])
         root = self.objectTree.invisibleRootItem()
         objectList = [root.child(i) for i in range(root.childCount())]
@@ -503,7 +581,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dataclassPolygonObject = dataclassFromWidget(obj, ObjectParams(), self.objectTree)
             polygonParams.objects.append(dataclassPolygonObject)
 
-        saveToFile(f'{outputPath}/polygon.json', json.dumps(dataclasses.asdict(polygonParams), indent=2))
+        saveToFile(outputPath, json.dumps(dataclasses.asdict(polygonParams), indent=2))
 
     def createRobotJSON(self, outputPath):
         robotDataclass = Robots([])
@@ -514,7 +592,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dataclassRobotFromWidget = dataclassFromWidget(obj, RobotParams(), self.robotTree)
             robotDataclass.robotList.append(dataclassRobotFromWidget)
 
-        saveToFile(f'{outputPath}/robots.json', json.dumps(dataclasses.asdict(robotDataclass), indent=2))
+        saveToFile(outputPath, json.dumps(dataclasses.asdict(robotDataclass), indent=2))
 
     def createTeamJSON(self, outputPath):
         gameDataclass = Game([])
@@ -530,7 +608,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             gameDataclass.teams.append(teamDataclass)
 
-        saveToFile(f'{outputPath}/players.json', json.dumps(dataclasses.asdict(gameDataclass), indent=2))
+        saveToFile(outputPath, json.dumps(dataclasses.asdict(gameDataclass), indent=2))
 
     def loadPolygonJSON(self):
         """Loads Polygon's dataclass from the JSON file"""
@@ -726,6 +804,10 @@ class MainWindow(QtWidgets.QMainWindow):
         except requests.exceptions.MissingSchema or ConnectionError:
             self.showWarning(self.config.get('LOCALE', 'hostError'))
 
+    def changeSocketSettings(self):
+        self.socketWindow = SocketSettingsWindow(self)
+        self.socketWindow.show()
+
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden
         for child in children:
@@ -752,12 +834,16 @@ class MainWindow(QtWidgets.QMainWindow):
         for item in selectedItems:
             item.setSelected(False)
 
-    def translateToRUS(self):
+    def translateToRU(self):
         self.currentLocale = 'RU'
+        self.objectRolesDict = createObjectRolesDict(self.currentLocale)
+        self.playerRolesDict = createPlayerRolesDict(self.currentLocale)
         translateToRUS(self, 0)
 
     def translateToEN(self):
         self.currentLocale = 'EN'
+        self.objectRolesDict = createObjectRolesDict(self.currentLocale)
+        self.playerRolesDict = createPlayerRolesDict(self.currentLocale)
         translateToEN(self, 0)
 
     def getReply(self, title, text):

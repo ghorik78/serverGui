@@ -27,6 +27,5 @@ class RobotWindow(QWidget):
 
     def robotSelectButtonClicked(self):
         selectedRobot = self.dRobotTree.selectedItems()[0]
-        index = self.dRobotTree.indexOfTopLevelItem(selectedRobot)
-        self.robotWidget.setText(1, f'{index}')
+        self.robotWidget.setText(1, f'{selectedRobot.text(0)}')
         self.close()

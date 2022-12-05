@@ -16,7 +16,7 @@ def translateToEN(window, windowType):
 
 def translateMainWindow(mainWindow: QMainWindow, language):
     """Translates children in the mainWindow."""
-    parser = ConfigParser()
+    parser = mainWindow.config
     parser.read(f'locales/{language}.ini', encoding='UTF-8')
 
     mainWindow.setWindowTitle(parser.get('LOCALE', 'windowTitle'))
@@ -71,9 +71,6 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.commandTable.horizontalHeaderItem(6).setText(parser.get('LOCALE', 'command6'))
     mainWindow.commandTable.horizontalHeaderItem(7).setText(parser.get('LOCALE', 'command7'))
     mainWindow.commandTable.horizontalHeaderItem(8).setText(parser.get('LOCALE', 'command8'))
-
-    mainWindow.hostnameLineEdit.setPlaceholderText(parser.get('LOCALE', 'hostnamePlaceholder'))
-    mainWindow.portLineEdit.setPlaceholderText(parser.get('LOCALE', 'portPlaceholder'))
 
     mainWindow.statusLabel.setText(parser.get('LOCALE', 'selectAction'))
 

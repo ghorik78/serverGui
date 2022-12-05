@@ -1,18 +1,61 @@
 import configparser
 import json
 import random
+import typing
+import re
+import matplotlib
+import matplotlib.pyplot as plt
 
+from PIL import Image
+
+from database.database import *
 from classes.dataclasses import *
+
+from scipy import ndimage
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.image import imread
 
 from PyQt5 import Qt, QtCore
 from PyQt5.QtWidgets import QMenu, QAction, QTreeWidgetItem, QTreeWidget, QComboBox, QFileDialog, QTableWidget, \
     QCheckBox, QTableWidgetItem, QHBoxLayout, QWidget, QPushButton
 
-import typing
-import re
 
 teamList = []
 playerList = []  # first index -> team index from zero, second index -> player index from zero
+
+
+def createStartPlaceFigures(fieldWidth: float, fieldHeight: float):
+    startPlace = imread('images/startPlace.png')
+    startPlaceRotated = ndimage.rotate(startPlace, 90)
+    img = OffsetImage(startPlaceRotated, zoom=0.175)
+    return [AnnotationBbox(img, (fieldWidth * 0.085, fieldHeight * 0.1), frameon=False),
+            AnnotationBbox(img, (fieldWidth * 0.085, fieldHeight * 0.33), frameon=False),
+            AnnotationBbox(img, (fieldWidth * 0.085, fieldHeight * 0.56), frameon=False),
+            AnnotationBbox(img, (fieldWidth * 0.085, fieldHeight * 0.79), frameon=False),
+            AnnotationBbox(img, (fieldWidth * 0.785, fieldHeight * 0.1), frameon=False),
+            AnnotationBbox(img, (fieldWidth * 0.785, fieldHeight * 0.33), frameon=False),
+            AnnotationBbox(img, (fieldWidth * 0.785, fieldHeight * 0.56), frameon=False),
+            AnnotationBbox(img, (fieldWidth * 0.785, fieldHeight * 0.79), frameon=False)]
+
+
+def createFigureByRole(currentLocale: str, role: str, pos: tuple):
+    checkImage(getPathByAssert(currentLocale, role))
+    imgFile = imread(getPathByAssert(currentLocale, role))
+    img = OffsetImage(imgFile, zoom=0.15)
+
+    return AnnotationBbox(img, pos, frameon=False)
+
+
+def checkImage(path):
+    img = Image.open(path)
+    if img.size != (176, 176):
+        img = img.resize((176, 176), Image.ANTIALIAS)
+        img.save(path)
+        img.close()
+
+
+def resizeImage(image):
+    image.resize((176, 176), Image.ANTIALIAS)
 
 
 def callTreeContextMenu(createLabel, removeLabel, parent, isChildSelected):  # tree context menus for main window
@@ -169,6 +212,12 @@ def objectFromDict(dictionary, outputClass):
 
 
 def updateStateTable(dataclass, table: QTableWidget):
+    """
+    Updates states table in GameController tab.
+    :param dataclass: ServerState or PlayerItem dataclass
+    :param table: QTableWidget
+    :return: None
+    """
     if dataclass.__class__ == ServerState:
         table.insertRow(0) if table.rowCount() == 0 else None
         items = [QTableWidgetItem(dataclass.version),
@@ -252,9 +301,17 @@ def readJSON(filepath: str) -> dict:
         pass
 
 
+def getObjectPos(pos: list):
+    return pos[0], pos[1]
+
+
 def listFromStr(string: str):
     """Makes list (0, 0, 0) from string like '(0, 0, 0)'"""
     return [float(s) for s in re.findall(r'-?\d+\.?\d*', string)]
+
+
+def removeDigitsFromStr(string: str):
+    return ''.join([symbol for symbol in string if not symbol.isdigit()])
 
 
 def itemListToStr(items):
@@ -286,7 +343,7 @@ def saveToFile(filename, data):
 
 
 def getOutputPath(parent, title):
-    return QFileDialog(parent, title).getExistingDirectory()
+    return QFileDialog(parent, title).getSaveFileName()[0]
 
 
 def getSelectedJson(parent, title: str):
