@@ -23,7 +23,7 @@
       <item>
        <widget class="QTabWidget" name="externalTab">
         <property name="currentIndex">
-         <number>1</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
@@ -729,129 +729,6 @@
           <string>Game controller</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="0">
-           <widget class="QFrame" name="gridFrame_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>1</verstretch>
-             </sizepolicy>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_4">
-             <item row="6" column="0">
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="2" column="0">
-              <widget class="QPushButton" name="startGameButton">
-               <property name="text">
-                <string>Start game</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QPushButton" name="restartGameButton">
-               <property name="text">
-                <string>Restart game</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QPushButton" name="sendJsonButton">
-               <property name="text">
-                <string>Send JSON</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QPushButton" name="stopGameButton">
-               <property name="text">
-                <string>Stop game</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0" colspan="2">
-              <widget class="QLabel" name="statusLabel">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="jsonSelectingComboBox">
-               <item>
-                <property name="text">
-                 <string>Polygon</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Robots</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Teams</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>All</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Select manually</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="delayComboBox">
-               <item>
-                <property name="text">
-                 <string>Delay 0</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Delay 15</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Delay 30</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Delay 60</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="createGameButton">
-               <property name="text">
-                <string>Create game</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QFrame" name="verticalFrame_2">
             <property name="sizePolicy">
@@ -988,6 +865,196 @@
                 </property>
                </column>
               </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QFrame" name="horizontalFrame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <property name="rightMargin">
+              <number>1</number>
+             </property>
+             <item alignment="Qt::AlignHCenter">
+              <widget class="QLabel" name="label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <horstretch>1</horstretch>
+                 <verstretch>1</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>15</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>15</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Game creating using existing files</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QGridLayout" name="gridLayout_4">
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="QPushButton" name="polygonCfgBttn">
+                 <property name="text">
+                  <string>Polygon's config</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QPushButton" name="robotCfgBttn">
+                 <property name="text">
+                  <string>Robot's config</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QPushButton" name="playerCfgBttn">
+                 <property name="text">
+                  <string>Player's config</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="8" column="0">
+                <spacer name="verticalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Preferred</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLabel" name="polygonLabel">
+                 <property name="text">
+                  <string>File not selected</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLabel" name="robotsLabel">
+                 <property name="text">
+                  <string>File not selected</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLabel" name="teamsLabel">
+                 <property name="text">
+                  <string>File not selected</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0" colspan="2">
+                <widget class="QPushButton" name="createGameBttn">
+                 <property name="text">
+                  <string>Create game</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QGridLayout" name="gridLayout_2">
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <item row="2" column="0">
+                <widget class="QPushButton" name="stopGameButton">
+                 <property name="text">
+                  <string>Stop game</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="delayComboBox">
+                 <item>
+                  <property name="text">
+                   <string>Delay 0</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Delay 15</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Delay 30</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Delay 60</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QPushButton" name="startGameButton">
+                 <property name="text">
+                  <string>Start game</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QPushButton" name="restartGameButton">
+                 <property name="text">
+                  <string>Restart game</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <spacer name="verticalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
@@ -1151,9 +1218,8 @@
      <string>File</string>
     </property>
     <addaction name="saveAsAct"/>
-    <addaction name="openPolygonCfgAct"/>
-    <addaction name="openRobotCfgAct"/>
-    <addaction name="openTeamCfgAct"/>
+    <addaction name="saveGameAct"/>
+    <addaction name="openCfgAct"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -1171,27 +1237,37 @@
   </action>
   <action name="saveAsAct">
    <property name="text">
-    <string>Save current as</string>
+    <string>Export current</string>
    </property>
   </action>
-  <action name="openPolygonCfgAct">
+  <action name="openCfgAct">
    <property name="text">
-    <string>Open polygon config</string>
+    <string>Import config</string>
    </property>
   </action>
   <action name="openRobotCfgAct">
    <property name="text">
-    <string>Open robot's config</string>
+    <string>Import robot's config</string>
    </property>
   </action>
   <action name="openTeamCfgAct">
    <property name="text">
-    <string>Open team's config</string>
+    <string>Import team's config</string>
    </property>
   </action>
   <action name="actionSocketSettings">
    <property name="text">
     <string>Socket settings</string>
+   </property>
+  </action>
+  <action name="openGameCfgAct">
+   <property name="text">
+    <string>Import game</string>
+   </property>
+  </action>
+  <action name="saveGameAct">
+   <property name="text">
+    <string>Export game</string>
    </property>
   </action>
  </widget>

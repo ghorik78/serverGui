@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>321</width>
-    <height>124</height>
+    <width>336</width>
+    <height>80</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="bottomMargin">
-      <number>10</number>
+      <number>0</number>
      </property>
      <item>
       <widget class="QFrame" name="horizontalFrame">

@@ -21,4 +21,5 @@ class RobotCreatingWindow(QDialog):
         newRobot = self.mainUi.robotTree.selectedItems()[0]
         selectedRobot = self.robotComboBox.currentText()
         newRobot.setText(0, selectedRobot)
+        self.mainUi.updateController()
         self.close()

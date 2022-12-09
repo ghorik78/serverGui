@@ -2,7 +2,7 @@ import configparser
 
 from utils.templates import *
 
-from PyQt5 import uic
+from PyQt5 import uic, QtGui
 from PyQt5.QtWidgets import QWidget, QPushButton, QTreeWidget, QTreeWidgetItem, QDialog
 
 
@@ -21,6 +21,10 @@ class PolygonRoleWindow(QDialog):
         self.setWindowTitle(self.mainUi.config.get('LOCALE', 'selectRole'))
         fillComboBoxByRoles(self.mainUi.objectRolesDict, self.rolesComboBox)
 
+    def closeEvent(self, a0: QtGui.QCloseEvent):
+        newObject = self.mainUi.objectTree.selectedItems()[0] if len(self.mainUi.objectTree.selectedItems()) else None
+        self.mainUi.objectTree.invisibleRootItem().removeChild(newObject)
+
     def submit(self):
         newObject = self.mainUi.objectTree.selectedItems()[0]
         selectedRole = self.rolesComboBox.currentText()  # in this case role == assert
@@ -37,6 +41,8 @@ class PolygonRoleWindow(QDialog):
             self.mainUi.totalCreated.update({f'{role}': created})
 
         self.mainUi.updatePolygonPlots()
+        self.mainUi.updateController()
+        self.mainUi.setUnselected(self.mainUi.objectTree.selectedItems())
         self.close()
 
 

@@ -41,8 +41,7 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.playerTree.headerItem().setText(0, parser.get('LOCALE', 'playerColumn0'))
     mainWindow.playerTree.headerItem().setText(1, parser.get('LOCALE', 'valueTitle'))
 
-    mainWindow.sendJsonButton.setText(parser.get('LOCALE', 'sendJson'))
-    mainWindow.createGameButton.setText(parser.get('LOCALE', 'createGame'))
+    mainWindow.createGameBttn.setText(parser.get('LOCALE', 'createGame'))
     mainWindow.startGameButton.setText(parser.get('LOCALE', 'startGame'))
     mainWindow.restartGameButton.setText(parser.get('LOCALE', 'restartGame'))
     mainWindow.stopGameButton.setText(parser.get('LOCALE', 'stopGame'))
@@ -51,12 +50,6 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.delayComboBox.setItemText(1, parser.get('LOCALE', 'delay1'))
     mainWindow.delayComboBox.setItemText(2, parser.get('LOCALE', 'delay2'))
     mainWindow.delayComboBox.setItemText(3, parser.get('LOCALE', 'delay3'))
-
-    mainWindow.jsonSelectingComboBox.setItemText(0, parser.get('LOCALE', 'polygon'))
-    mainWindow.jsonSelectingComboBox.setItemText(1, parser.get('LOCALE', 'robots'))
-    mainWindow.jsonSelectingComboBox.setItemText(2, parser.get('LOCALE', 'teams'))
-    mainWindow.jsonSelectingComboBox.setItemText(3, parser.get('LOCALE', 'all'))
-    mainWindow.jsonSelectingComboBox.setItemText(4, parser.get('LOCALE', 'selectManually'))
 
     mainWindow.infoTable.horizontalHeaderItem(0).setText(parser.get('LOCALE', 'info0'))
     mainWindow.infoTable.horizontalHeaderItem(1).setText(parser.get('LOCALE', 'info1'))
@@ -72,7 +65,7 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.commandTable.horizontalHeaderItem(7).setText(parser.get('LOCALE', 'command7'))
     mainWindow.commandTable.horizontalHeaderItem(8).setText(parser.get('LOCALE', 'command8'))
 
-    mainWindow.statusLabel.setText(parser.get('LOCALE', 'selectAction'))
+    #mainWindow.statusLabel.setText(parser.get('LOCALE', 'selectAction'))
 
 
 

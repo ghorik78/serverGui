@@ -122,7 +122,7 @@ def fillObjectTree(polygon: PolygonParams, tree: QTreeWidget, config: configpars
             fieldItem = QTreeWidgetItem()
             fieldItem.setText(0, str(field))
             fieldItem.setText(1, str(obj.__dict__.get(field)))
-            fieldItem.setToolTip(1, "Press to do smth")
+            fieldItem.setToolTip(1, "Press to change the field value.")
             newObject.addChild(fieldItem)
 
         newObject.setText(0, obj.__dict__.get('title'))
@@ -155,7 +155,7 @@ def fillComboBoxByRoles(rolesDict: dict, comboBox: QComboBox):
 
 
 # Fills tree from game dataclass
-def fillGameTree(game: Game, teamTree: QTreeWidget, playerTree: QTreeWidget):
+def fillGameTree(game: Teams, teamTree: QTreeWidget, playerTree: QTreeWidget):
     """
     Fills the game tree by dataclass objects.
     After loading JSON file the program will set team 0 as current.
@@ -311,7 +311,11 @@ def listFromStr(string: str):
 
 
 def removeDigitsFromStr(string: str):
-    return ''.join([symbol for symbol in string if not symbol.isdigit()])
+    return ''.join([symbol for symbol in string if symbol.isalpha() or symbol.isspace()])
+
+
+def removeSpacesFromStr(string: str):
+    return ''.join([symbol for symbol in string if not symbol.isspace()])
 
 
 def itemListToStr(items):

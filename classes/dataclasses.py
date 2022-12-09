@@ -10,7 +10,6 @@ ROBOT_CUSTOM_FIELDS = []
 @dataclasses.dataclass
 class RobotParams:
     aliases = dict(control_obj=CONTROL_OBJECTS)
-
     title: str = "New robot"
     ip: str = "127.0.0.1"
     port: int = 0
@@ -28,7 +27,6 @@ class PlayerParams:
 
     title: str = "New player"
     robot: typing.List[RobotParams] = ""
-    name_player: str = "not set"
     role_obj: str = ""
     method_control_obj: str = ""
 
@@ -42,7 +40,7 @@ class TeamParams:
 
 
 @dataclasses.dataclass
-class Game:
+class Teams:
     teams: typing.List[TeamParams]
 
 
@@ -66,8 +64,9 @@ class PolygonParams:
 
 @dataclasses.dataclass
 class Config:
-    game: Game
-    polygon: PolygonParams
+    teams: typing.List[TeamParams]
+    polygon: typing.List[ObjectParams]
+    robots: typing.List[RobotParams]
 
 
 @dataclasses.dataclass

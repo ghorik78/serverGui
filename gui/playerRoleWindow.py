@@ -3,10 +3,10 @@ import configparser
 from utils.templates import *
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QWidget, QPushButton, QTreeWidget, QTreeWidgetItem
+from PyQt5.QtWidgets import QWidget, QPushButton, QTreeWidget, QTreeWidgetItem, QDialog
 
 
-class PlayerRoleWindow(QWidget):
+class PlayerRoleWindow(QDialog):
     def __init__(self, mainUi):
         super(PlayerRoleWindow, self).__init__()
         uic.loadUi('uiFiles/playerRole.ui', self)
@@ -27,6 +27,7 @@ class PlayerRoleWindow(QWidget):
         newObject = self.mainUi.playerTree.selectedItems()[0]
         selectedRole = self.rolesComboBox.currentText()
         newObject.child(getFieldIndex(newObject, 'role_obj')).setText(1, str(selectedRole))
+        self.mainUi.updateController()
         self.close()
 
 

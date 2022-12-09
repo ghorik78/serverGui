@@ -1,0 +1,52 @@
+{
+  "objects": [
+    {
+      "title": "Start Place",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    },
+    {
+      "title": "Start Place_1",
+      "position": [
+        2.0,
+        1.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    },
+    {
+      "title": "Drone",
+      "position": [
+        -3.0,
+        6.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    },
+    {
+      "title": "Factory",
+      "position": [
+        7.0,
+        7.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    }
+  ]
+}

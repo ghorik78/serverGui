@@ -1,0 +1,64 @@
+{
+  "teams": [
+    {
+      "players": [
+        {
+          "title": "Cat1",
+          "robot": "",
+          "role_obj": "Defender",
+          "method_control_obj": ""
+        },
+        {
+          "title": "Cat2",
+          "robot": "",
+          "role_obj": "RobofinistRole",
+          "method_control_obj": ""
+        }
+      ],
+      "title": "Cats",
+      "color_team": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "polygon": [
+    {
+      "title": "Start Place",
+      "position": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    },
+    {
+      "title": "Factory",
+      "position": [
+        1.0,
+        -1.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    }
+  ],
+  "robots": [
+    {
+      "title": "pioneer1",
+      "ip": "127.0.0.1",
+      "port": 0
+    },
+    {
+      "title": "eduBot1",
+      "ip": "127.0.0.1",
+      "port": 0
+    }
+  ]
+}

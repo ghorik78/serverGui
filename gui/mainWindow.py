@@ -1,4 +1,5 @@
 import configparser
+import dataclasses
 import json
 
 from database.database import *
@@ -64,13 +65,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionEnglish.triggered.connect(self.translateToEN)
 
         self.saveAsAct.triggered.connect(self.saveAs)
-        self.openPolygonCfgAct.triggered.connect(self.loadPolygonJSON)
-        self.openRobotCfgAct.triggered.connect(self.loadRobotJSON)
-        self.openTeamCfgAct.triggered.connect(self.loadTeamJSON)
+        self.saveGameAct.triggered.connect(self.exportGameJSON)
+        self.openCfgAct.triggered.connect(self.importJSON)
+        self.openGameCfgAct.triggered.connect(self.importGameJSON)
 
         self.actionSocketSettings.triggered.connect(self.changeSocketSettings)
 
         # Tree widgets
+        self.objectTree.itemChanged.connect(self.posChanged)
         self.robotTree.itemClicked.connect(self.robotTreeItemClickTrigger)
         self.teamTree.itemClicked.connect(self.teamTreeItemClickTrigger)
         self.playerTree.itemDoubleClicked.connect(self.playerTreeDoubleClickTrigger)
@@ -93,20 +95,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.createPlayerBttn.clicked.connect(self.createNewPlayer)
         self.removeSelectedPlayerBttn.clicked.connect(self.removePlayer)
-        self.removeAllPlayersBttn.clicked.connect(self.removeALlPlayers)
+        self.removeAllPlayersBttn.clicked.connect(self.removeAllPlayers)
 
-        self.sendJsonButton.clicked.connect(self.sendJson)
-        self.createGameButton.clicked.connect(self.createGame)
+        self.createGameBttn.clicked.connect(self.createGame)
         self.startGameButton.clicked.connect(self.startGame)
         self.restartGameButton.clicked.connect(self.restartGame)
         self.stopGameButton.clicked.connect(self.stopGame)
 
         # ComboBoxes
-        self.jsonSelectingComboBox.currentIndexChanged.connect(self.sendJson)
 
         # Graphics
-        self.fieldWidthLimits = [-3.0 * 0.1, 3.0]
-        self.fieldHeightLimits = [-3.0 * 0.1, 3.0]
+        self.objectsCoords = [[0.0, 0.0]]
+        self.minX, self.maxX = 0.0, 0.0
+        self.minY, self.maxY = 0.0, 0.0
 
         self.graphicsView = self.findChild(QGraphicsView, 'graphicsView')
         self.graphicsScene = QGraphicsScene()
@@ -150,11 +151,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filesSent = []
         self.currentTeamIndex = 0
 
-
         self.translateToEN()
         self.addContextMenus()
-
-        self.objectTree.itemChanged.connect(self.posChanged)
+        self.updateController()
 
     def updatePlots(self):
         self.graphicsScene.clear()
@@ -183,10 +182,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphicsScene.addWidget(canvas)
 
     def updatePolygonPlots(self):
+        """
+        Redraws all objects in the first tab.
+        :return: None
+        """
         self.polygonGraphicsScene.clear()
-
-        if self.externalTab.currentIndex() != 0:
-            return
 
         fig, ax = plt.subplots()
         fig.set_figheight(4.25)
@@ -201,7 +201,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 role = removeDigitsFromStr(child.text(0))
                 position = listFromStr(child.child(getFieldIndex(child, 'position')).text(1))
                 ax.add_artist(createFigureByRole(self.currentLocale, role, position[0:2]))
-                self.updateFieldLimits(position)
+                self.updateFieldLimits()
         except AttributeError:
             pass
 
@@ -222,7 +222,7 @@ class MainWindow(QtWidgets.QMainWindow):
         updateStateTable(objectFromDict(data, ServerState), self.infoTable)
 
         data = self.session.get(f'{self.serverAddr}/data_player').json()
-        updateStateTable(objectFromDict(data, Command), self.commandTable)
+        updateStateTable(objectFromDict(data, PlayerItem), self.commandTable)
 
     def addContextMenus(self):
         self.robotTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -309,8 +309,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def createNewPlayer(self):
         self.setUnselected(self.playerTree.selectedItems())
-        self.playerRolesWindow = PlayerRoleWindow(self)
-        self.playerRolesWindow.show()
 
         if not self.teamTree.invisibleRootItem().childCount():
             return
@@ -336,7 +334,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         playerList[self.currentTeamIndex].append(newPlayer)
 
+        self.playerRolesWindow = PlayerRoleWindow(self)
+        self.playerRolesWindow.exec_()
+
     def createNewObject(self):
+        """
+        Creates a new object and adds it into the tree.
+        :return: None
+        """
         self.setUnselected(self.objectTree.selectedItems())
 
         newObject = QTreeWidgetItem()
@@ -365,6 +370,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 continue
             (item.parent() or root).removeChild(item)
         self.isRobotSelected = False
+        self.updateController()
 
     def removeAllRobots(self):
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
@@ -377,6 +383,7 @@ class MainWindow(QtWidgets.QMainWindow):
         children = [root.child(i) for i in range(root.childCount())]
         for child in children:
             root.removeChild(child)
+        self.updateController()
 
     def removeTeam(self):
         root = self.teamTree.invisibleRootItem()
@@ -404,6 +411,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.teamTree.invisibleRootItem().child(0).setSelected(False)
         except AttributeError:  # if last item was removed
             pass
+        self.updateController()
 
     def removeAllTeams(self):
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
@@ -418,7 +426,7 @@ class MainWindow(QtWidgets.QMainWindow):
             root.removeChild(child)
 
         teamList.clear()
-        self.removeAllPlayersReinterpret()
+        self.removeAllPlayersReinterpret()  # controller buttons will be updated automatically
 
     def removePlayer(self):
         root = self.playerTree.invisibleRootItem()
@@ -427,8 +435,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 continue
             (item.parent() or root).removeChild(item)
         self.isPlayerSelected = False
+        self.updateController()
 
-    def removeALlPlayers(self):
+    def removeAllPlayers(self):
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
                               self.config.get('LOCALE', 'playersRemoveText'))
 
@@ -441,9 +450,11 @@ class MainWindow(QtWidgets.QMainWindow):
         children = playerList[selectedTeamIdx]
 
         # [1, 2, 3, 3, 4] -> [1, 2, 3, 4] if you try to remove 3 in straight order
-        for i in range(len(children)-1, -1, -1):
+        for i in range(len(children) - 1, -1, -1):
             root.removeChild(children[i])
             playerList[selectedTeamIdx].remove(children[i])
+
+        self.updateController()
 
     def removeAllPlayersReinterpret(self):
         root = self.playerTree.invisibleRootItem()
@@ -451,6 +462,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for child in children:
             root.removeChild(child)
         playerList.clear()
+        self.updateController()
 
     def removeObject(self):
         root = self.objectTree.invisibleRootItem()
@@ -461,6 +473,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isObjectSelected = False
 
         self.updatePolygonPlots()
+        self.updateController()
 
     def removeAllObjects(self):
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
@@ -475,6 +488,7 @@ class MainWindow(QtWidgets.QMainWindow):
             root.removeChild(child)
 
         self.updatePolygonPlots()
+        self.updateController()
 
     # Triggers
     def saveAs(self):
@@ -488,11 +502,11 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         if self.externalTab.currentIndex() == 0:
-            self.createPolygonJSON(outputPath)
+            self.exportPolygonJSON(outputPath)
         elif self.externalTab.currentIndex() == 1:
-            self.createRobotJSON(outputPath)
+            self.exportRobotJSON(outputPath)
         else:
-            self.createTeamJSON(outputPath)
+            self.exportTeamJSON(outputPath)
 
     def robotTreeItemClickTrigger(self, item, col):
         self.isRobotSelected = True
@@ -540,23 +554,55 @@ class MainWindow(QtWidgets.QMainWindow):
             self.filterWindow = FilterWindow(self, item)
             self.filterWindow.show()
 
-    def posChanged(self):
-        """
-        Updates polygon plots when position field has changed.
-        """
-        self.updatePolygonPlots()
+    def updateObjectLimits(self, objectCoords):
+        self.minX = min([coord[0] for coord in objectCoords])
+        self.maxX = max([coord[0] for coord in objectCoords])
+        self.minY = min([coord[1] for coord in objectCoords])
+        self.maxY = max([coord[1] for coord in objectCoords])
 
-    def updateFieldLimits(self, newPos: list):
+    def posChanged(self, item, column):
+        """
+        Updates polygon plots when position field has changed. The column must be equal 1.
+        """
+        if column:
+            text = removeSpacesFromStr(item.text(1))
+            if not re.compile('\\[-*\d+\.*\d*,-*\d+\.*\d*,-*\d+\.*\d*\\]').fullmatch(text) and \
+                    not re.compile('\\(-*\d+\.*\d*,-*\d+\.*\d*,-*\d+\.*\d*\\)').fullmatch(text):
+                self.showWarning(self.config.get('LOCALE', 'sizeError'))
+                return
+
+            self.removeOldCoords()
+            newPosition = listFromStr(item.text(1))[0:2]
+            self.objectsCoords.append(newPosition)
+            self.updateObjectLimits(self.objectsCoords)
+            self.updatePolygonPlots()
+
+    def removeOldCoords(self):
+        actualPositions = []
+        root = self.objectTree.invisibleRootItem()
+        children = [root.child(i) for i in range(root.childCount())]
+
+        for child in children:
+            position = listFromStr(child.child(getFieldIndex(child, 'position')).text(1))
+            actualPositions.append(position[0:2])
+
+        for pos in self.objectsCoords:
+            if pos not in actualPositions:
+                self.objectsCoords.remove(pos)
+
+    def updateFieldLimits(self):
         """
         Updates field limits for the most correct drawing.
         Make sure that position coords is positive.
         :param newPos: list
         :return: None
         """
-        self.fieldWidthLimits = [min(-newPos[1] * 0.1, self.fieldWidthLimits[0]), self.fieldWidthLimits[1]]
-        self.fieldWidthLimits = [self.fieldWidthLimits[0], max(newPos[0] * 1.1, self.fieldWidthLimits[1])]
-        self.fieldHeightLimits = [min(-newPos[0] * 0.1, self.fieldHeightLimits[0]), self.fieldHeightLimits[1]]
-        self.fieldHeightLimits = [self.fieldHeightLimits[0], max(newPos[1] * 1.1, self.fieldHeightLimits[1])]
+        newMinX = min([-abs(self.maxX * 0.25), abs(self.maxY * 0.25), self.minX * 1.25])
+        newMaxX = max([abs(self.maxY * 0.25), abs(self.minY * 0.25), abs(self.minX * 0.25), self.maxX * 1.25])
+        newMinY = min([-abs(self.maxY * 0.25), -abs(self.maxX * 0.25), self.minY * 1.25])
+        newMaxY = max(abs(self.maxX * 0.25), abs(self.minX * 0.25), self.maxY * 1.25)
+        self.fieldWidthLimits = [newMinX, newMaxX]
+        self.fieldHeightLimits = [newMinY, newMaxY]
 
     def updateServerAddress(self):
         """
@@ -566,13 +612,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.serverAddr = f"http://{self.hostname}:{self.port}/"
 
     # Actions
-    def createPolygonJSON(self, outputPath):
-        """
-        Creates a JSON file using polygon dataclasses.
-        The input data takes from the tree.
-        :param outputPath: string
-        :return: None
-        """
+    def createPolygonParams(self):
         polygonParams = PolygonParams([])
         root = self.objectTree.invisibleRootItem()
         objectList = [root.child(i) for i in range(root.childCount())]
@@ -581,21 +621,35 @@ class MainWindow(QtWidgets.QMainWindow):
             dataclassPolygonObject = dataclassFromWidget(obj, ObjectParams(), self.objectTree)
             polygonParams.objects.append(dataclassPolygonObject)
 
+        return polygonParams
+
+    def exportPolygonJSON(self, outputPath):
+        """
+        Creates a JSON file using polygon dataclasses.
+        The input data takes from the tree.
+        :param outputPath: string
+        :return: None
+        """
+        polygonParams = self.createPolygonParams()
         saveToFile(outputPath, json.dumps(dataclasses.asdict(polygonParams), indent=2))
 
-    def createRobotJSON(self, outputPath):
-        robotDataclass = Robots([])
+    def createRobotParams(self):
+        robotDataclasses = Robots([])
         root = self.robotTree.invisibleRootItem()
         objectList = [root.child(i) for i in range(root.childCount())]
 
         for obj in objectList:
             dataclassRobotFromWidget = dataclassFromWidget(obj, RobotParams(), self.robotTree)
-            robotDataclass.robotList.append(dataclassRobotFromWidget)
+            robotDataclasses.robotList.append(dataclassRobotFromWidget)
 
+        return robotDataclasses
+
+    def exportRobotJSON(self, outputPath):
+        robotDataclass = self.createRobotParams()
         saveToFile(outputPath, json.dumps(dataclasses.asdict(robotDataclass), indent=2))
 
-    def createTeamJSON(self, outputPath):
-        gameDataclass = Game([])
+    def createTeamsParams(self):
+        gameDataclass = Teams([])
         root = self.teamTree.invisibleRootItem()
 
         for i in range(root.childCount()):
@@ -608,28 +662,66 @@ class MainWindow(QtWidgets.QMainWindow):
 
             gameDataclass.teams.append(teamDataclass)
 
+        return gameDataclass
+
+    def exportTeamJSON(self, outputPath):
+        gameDataclass = self.createTeamsParams()
         saveToFile(outputPath, json.dumps(dataclasses.asdict(gameDataclass), indent=2))
 
-    def loadPolygonJSON(self):
-        """Loads Polygon's dataclass from the JSON file"""
-        self.clearPolygonData()
+    def createGameParams(self):
+        configDataclass = Config(teams=self.createTeamsParams().teams,
+                                 polygon=self.createPolygonParams().objects,
+                                 robots=self.createRobotParams().robotList)
+        return configDataclass
+
+    def exportGameJSON(self):
+        outputPath = getOutputPath(self, self.config.get('LOCALE', 'getOutputPath'))
+        if outputPath:
+            configDataclass = self.createGameParams()
+            saveToFile(outputPath, json.dumps(dataclasses.asdict(configDataclass), indent=2))
+
+    def importJSON(self):
         filepath = getSelectedJson(self, 'Select file')
+        try:
+            extension = filepath.split('/')[-1].split('.')[-1]
+
+            if extension == 'polygon':
+                self.loadPolygonJSON(filepath)
+            elif extension == 'robots':
+                self.loadRobotJSON(filepath)
+            elif extension == "players":
+                self.importTeamJSON(filepath)
+            elif extension == "game":
+                self.importGameJSON(filepath)
+            else:
+                self.showWarning(self.config.get('LOCALE', 'wrongExtension'))
+        except Exception:
+            pass
+
+    def loadPolygonJSON(self, filepath):
+        """
+        Loads Polygon's dataclass from the JSON file.
+        """
+        self.clearPolygonData()
 
         try:
             polygon = PolygonParams(**readJSON(filepath))
             polygon.objects = serializeChildren(polygon.objects, ObjectParams)
             fillObjectTree(polygon, self.objectTree, self.config)
-
+            self.objectsCoords = [obj.position[0:2] for obj in polygon.objects]
+            self.updateObjectLimits(self.objectsCoords)
             self.statusBar.showMessage(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}", 10000)
             self.externalTab.setCurrentIndex(0)
-            self.isPolygonJsonSelected = True
         except TypeError:  # if file selecting was cancelled
             pass
 
-    def loadRobotJSON(self):
-        """Loads robot dataclass from the JSON file"""
+        self.updatePolygonPlots()
+
+    def loadRobotJSON(self, filepath):
+        """
+        Loads robot dataclass from the JSON file.
+        """
         self.clearRobotData()
-        filepath = getSelectedJson(self, 'Select file')
 
         try:
             robots = Robots(**readJSON(filepath))
@@ -641,136 +733,85 @@ class MainWindow(QtWidgets.QMainWindow):
         except TypeError:
             pass
 
-    def loadTeamJSON(self):
-        """Loads team's dataclass from the JSON file"""
+    def importTeamJSON(self, filepath):
+        """
+        Loads team's dataclass from the JSON file.
+        :param filepath: string
+        :return: None
+        """
         self.clearTeamData()
-        filepath = getSelectedJson(self, 'Select file')
 
         try:
-            game = Game(**readJSON(filepath))
-            game.teams = serializeChildren(game.teams, TeamParams)
+            teams = Teams(**readJSON(filepath))
+            teams.teams = serializeChildren(teams.teams, TeamParams)
 
-            for team in game.teams:
+            for team in teams.teams:
                 team.players = serializeChildren(team.players, PlayerParams)
 
-            fillGameTree(game, self.teamTree, self.playerTree)
+            fillGameTree(teams, self.teamTree, self.playerTree)
             self.statusBar.showMessage(f"{self.config.get('LOCALE', 'jsonLabel')} {filepath.split('/')[-1]}", 10000)
             self.externalTab.setCurrentIndex(2)
             self.isTeamsJsonSelected = True
         except TypeError:
             pass
 
-    # Button controllers
-    def sendJson(self):
+    def importGameJSON(self, filepath):
         """
-        Sends JSON file(-s) to the http server.
-        If you want to send tab's json file, make sure that it was loaded and still in the directory.
+        Imports selected by user .game (JSON) file.
+        Widget trees will be updated automatically.
+        Controller will be updated automatically.
+        Polygon plots will be updated automatically.
+        :return: None
         """
-
-        # 0 index is polygon
-        # 1 index is robots
-        # 2 index is teams & players
-        # 3 index is all
-        currIndex = self.jsonSelectingComboBox.currentIndex()
+        self.clearPolygonData()
+        self.clearRobotData()
+        self.clearTeamData()
 
         try:
-            if (currIndex == 0) and self.isPolygonJsonSelected:
-                data = open("json/polygon.json").read()
-
-                try:
-                    self.session.get(f"{self.serverAddr}", params=dict(target="set",
-                                                                       type_command="core",
-                                                                       command="save_json",
-                                                                       filename='polygon.json'), json=data)
-                except requests.exceptions.MissingSchema or ConnectionError:
-                    self.showWarning(self.config.get("LOCALE", "hostError"))
-
-            elif (currIndex == 1) and self.isRobotsJsonSelected:
-                data = open("json/robots.json").read()
-
-                try:
-                    self.session.get(f"{self.serverAddr}", params=dict(target="set",
-                                                                       type_command="core",
-                                                                       command="save_json",
-                                                                       filename='robots.json'), json=data)
-                except requests.exceptions.MissingSchema or ConnectionError:
-                    self.showWarning(self.config.get("LOCALE", "hostError"))
-
-            elif (currIndex == 2) and self.isTeamsJsonSelected:
-                data = open("json/players.json").read()
-
-                try:
-                    self.session.get(f"{self.serverAddr}", params=dict(target="set",
-                                                                       type_command="core",
-                                                                       command="save_json",
-                                                                       filename='players'), json=data)
-                except requests.exceptions.MissingSchema or ConnectionError:
-                    self.showWarning(self.config.get("LOCALE", "hostError"))
-
-            else:
-                files = getMultipleSelectedJson(self)
-
-                trashFlag = False  # will be set to True if not json
-
-                for file in files:
-                    filename = file.split('/')[-1].split('.')[0]
-                    filetype = file.split('/')[-1].split('.')[1]
-
-                    self.filesSent.append(filename) if filename not in self.filesSent else None
-
-                    if filetype != 'json':
-                        trashFlag = True
-                        continue
-
-                    data = open(file).read()
-
-                    try:
-                        self.session.get(f"{self.serverAddr}", params=dict(target="set",
-                                                                           type_command="core",
-                                                                           command=f"save_json",
-                                                                           filename=filename), json=data)
-                        self.statusLabel.setText(self.config.get('LOCALE', 'successfully'))
-                    except requests.exceptions.MissingSchema or ConnectionError:
-                        self.isReadyToCreate = False
-                        self.statusLabel.setText(self.config.get('LOCALE', 'error'))
-                        self.showWarning(self.config.get("LOCALE", "hostError"))
-                        return
-
-                if trashFlag:  # Show error message if file extension != json
-                    self.showWarning(self.config.get("LOCALE", "wrongExtension"))
-                    return
-
-                self.isReadyToCreate = True
-
-        except FileNotFoundError or TypeError:
-            self.showWarning(self.config.get("LOCALE", "fileNotFound"))
-
-    def createGame(self):
-        """Sends game create request"""
-        if (len(self.filesSent) < 3) or not self.isReadyToCreate:
-            self.showWarning(self.config.get('LOCALE', 'notEnoughFiles'))
+            cfg = Config(**readJSON(filepath))
+            cfg.teams = serializeChildren(cfg.teams, TeamParams)
+            cfg.robots = serializeChildren(cfg.robots, RobotParams)
+            cfg.polygon = serializeChildren(cfg.polygon, ObjectParams)
+        except TypeError:  # if file selecting was cancelled
             return
 
+        for team in cfg.teams:
+            team.players = serializeChildren(team.players, PlayerParams)
+
+        fillObjectTree(PolygonParams(cfg.polygon), self.objectTree, self.config)
+        fillRobotTree(Robots(cfg.robots), self.robotTree)
+        fillGameTree(Teams(cfg.teams), self.teamTree, self.playerTree)
+
+        self.objectsCoords = [obj.position[0:2] for obj in cfg.polygon]
+        self.updateObjectLimits(self.objectsCoords)
+        self.updatePolygonPlots()
+        self.updateController()
+        self.externalTab.setCurrentIndex(0)
+        self.statusBar.showMessage(f'{self.config.get("LOCALE", "jsonLabel")} {filepath}', 10000)
+
+    # Button controllers
+    def isReadyToCreate(self):
+        return self.objectTree.invisibleRootItem().childCount() and \
+               self.robotTree.invisibleRootItem().childCount() and \
+               self.teamTree.invisibleRootItem().childCount() and \
+               self.playerTree.invisibleRootItem().childCount()
+
+    def createGame(self):
+        """
+        Creates .game (JSON) file and sends it to the server over http.
+        :return: None
+        """
+        if not self.isReadyToCreate():
+            return
+
+        configDataclass = self.createGameParams()
+
         try:
-            data = self.session.get(f'{self.serverAddr}', params=dict(target="set",
-                                                                      type_command="core",
-                                                                      command="create_game",
-                                                                      param=None)).json().get('data')
-
-            self.statusLabel.setText(self.config.get('LOCALE', 'successfully'))
-
-            updateStateTable(objectFromDict(json.loads(data), ServerState), self.infoTable)
-
-            playerId = 0
-            for team in teamList:
-                currTeamIdx = teamList.index(team)
-
-                for player in playerList[currTeamIdx]:
-                    playerItem = PlayerItemFromPlayerWidget(player, playerId, team.text(0))
-                    playerId += 1
-
-                    updateStateTable(playerItem, self.commandTable)
-
+            self.session.post(f'{self.serverAddr}', params=dict(target='set',
+                                                                type_command='core',
+                                                                filename='game.game',
+                                                                command='save_json'),
+                              json=json.dumps(dataclasses.asdict(configDataclass), indent=2))
         except requests.exceptions.MissingSchema or ConnectionError:
             self.showWarning(self.config.get('LOCALE', 'hostError'))
 
@@ -804,15 +845,47 @@ class MainWindow(QtWidgets.QMainWindow):
         except requests.exceptions.MissingSchema or ConnectionError:
             self.showWarning(self.config.get('LOCALE', 'hostError'))
 
+    def updateController(self):
+        """
+        Updates config buttons inside the GameController tab. Also updates status labels.
+        :return: None
+        """
+        objectsCount = self.objectTree.invisibleRootItem().childCount()
+        robotsCount = self.robotTree.invisibleRootItem().childCount()
+        teamCount = self.teamTree.invisibleRootItem().childCount()
+        playerCount = self.playerTree.invisibleRootItem().childCount()
+
+        if not objectsCount:
+            self.polygonCfgBttn.setEnabled(True)
+            self.polygonLabel.setText(self.config.get('LOCALE', 'jsonLabelNot'))
+        else:
+            self.polygonCfgBttn.setEnabled(False)
+            self.polygonLabel.setText(self.config.get('LOCALE', 'configWillBeCreated'))
+
+        if not robotsCount:
+            self.robotCfgBttn.setEnabled(True)
+            self.robotsLabel.setText(self.config.get('LOCALE', 'jsonLabelNot'))
+        else:
+            self.robotCfgBttn.setEnabled(False)
+            self.robotsLabel.setText(self.config.get('LOCALE', 'configWillBeCreated'))
+
+        if (not playerCount) or (not teamCount):
+            self.playerCfgBttn.setEnabled(True)
+            self.teamsLabel.setText(self.config.get('LOCALE', 'jsonLabelNot'))
+        else:
+            self.playerCfgBttn.setEnabled(False)
+            self.teamsLabel.setText(self.config.get('LOCALE', 'configWillBeCreated'))
+
+        if (not objectsCount) or (not robotsCount) or (not teamCount) or (not playerCount):
+            self.createGameBttn.setEnabled(False)
+        else:
+            self.createGameBttn.setEnabled(True)
+
     def changeSocketSettings(self):
         self.socketWindow = SocketSettingsWindow(self)
         self.socketWindow.show()
 
-    def hideAllChildren(self, children):
-        self.isPlayerSelected = False  # Don't allow removing players if player is hidden
-        for child in children:
-            child.setHidden(True)
-
+    # Clear methods
     def clearPolygonData(self):
         self.objectTree.clear()
         self.isObjectSelected = False
@@ -830,10 +903,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isTeamSelected = False
         self.isPlayerSelected = False
 
+    def hideAllChildren(self, children):
+        self.isPlayerSelected = False  # Don't allow removing players if player is hidden
+        for child in children:
+            child.setHidden(True)
+
     def setUnselected(self, selectedItems: list):
         for item in selectedItems:
             item.setSelected(False)
 
+    # Localization
     def translateToRU(self):
         self.currentLocale = 'RU'
         self.objectRolesDict = createObjectRolesDict(self.currentLocale)
@@ -849,6 +928,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def getReply(self, title, text):
         return QMessageBox.question(self, title, text, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
+    # Warnings
     def showWarning(self, message: str):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
