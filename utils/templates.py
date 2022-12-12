@@ -6,6 +6,7 @@ import re
 import matplotlib
 import matplotlib.pyplot as plt
 
+from functools import partial
 from PIL import Image
 
 from database.database import *
@@ -211,6 +212,7 @@ def objectFromDict(dictionary, outputClass):
     return outputClass(**dictionary)
 
 
+
 def updateStateTable(parent, dataclass, data):
     """
     Updates states table in GameController tab.
@@ -251,6 +253,8 @@ def updateStateTable(parent, dataclass, data):
             layout.setAlignment(QtCore.Qt.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
             parent.commandTable.setCellWidget(currentRow, 1, buttonWidget)
+
+            blockButton.clicked.connect(partial(parent.shutdownPlayerAction, currentRow))
 
             player = json.loads(player)
             items = [QTableWidgetItem(str(player.get('id'))),

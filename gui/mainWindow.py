@@ -80,6 +80,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.objectTree.itemDoubleClicked.connect(self.objectTreeDoubleClickTrigger)
         self.objectTree.itemClicked.connect(self.objectTreeItemClickTrigger)
 
+        # Tables
+        #self.commandTable.itemClicked.connect(self.shutdownPlayerAction)
+
         # Buttons
         self.createPolygonObjBttn.clicked.connect(self.createNewObject)
         self.removeSelectedObjBttn.clicked.connect(self.removeObject)
@@ -106,8 +109,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Graphics
         self.objectsCoords = [[0.0, 0.0]]
-        self.minX, self.maxX = 0.0, 0.0
-        self.minY, self.maxY = 0.0, 0.0
+        self.minX, self.maxX = 1.0, 1.0
+        self.minY, self.maxY = 1.0, 1.0
 
         self.graphicsView = self.findChild(QGraphicsView, 'graphicsView')
         self.graphicsScene = QGraphicsScene()
@@ -819,8 +822,9 @@ class MainWindow(QtWidgets.QMainWindow):
             updateStateTable(self, PlayerItem(), acceptedPlayers)
 
 
-        except Exception:
+        except Exception as e:
             self.showWarning(self.config.get('LOCALE', 'hostError'))
+            print(str(e))
 
     def startGame(self):
         """Sends game start request"""
@@ -862,22 +866,45 @@ class MainWindow(QtWidgets.QMainWindow):
             currentState = self.blockedPlayers.get(currentId)
             newState = checkBox.isChecked()
 
-            if currentState != newState:
+            if (currentState != newState):
                 try:
-                    if newState:
-                        self.session.post(self.serverAddr, params=dict(target="set",
+                    if newState: # if you want to block player
+                        result = self.session.post(self.serverAddr, params=dict(target="set",
                                                                    type_command="player",
                                                                    command="block_player",
-                                                                   param=currentId))
-                    else:
-                        self.session.post(self.serverAddr, params=dict(target="set",
+                                                                   param=currentId)).json()
+                        if result.get('result'):
+                            self.showInfo(self.config.get('LOCALE', 'playerBlocked'))
+
+                    elif currentState is not None: # if you want to unblock player
+                        result = self.session.post(self.serverAddr, params=dict(target="set",
                                                                    type_command="player",
                                                                    command="unblock_player",
-                                                                   param=currentId))
-                except Exception:
+                                                                   param=currentId)).json()
+                        if result.get('result'):
+                            self.showInfo(self.config.get('LOCALE', 'playerUnblocked'))
+
+                except Exception as e:
                     self.showWarning(self.config.get('LOCALE', 'hostError'))
 
             self.blockedPlayers.update({currentId: checkBox.isChecked()})
+
+    def shutdownPlayerAction(self, row):
+        currentId = self.commandTable.item(row, 2).text()
+
+        try:
+            result = self.session.post(self.serverAddr, params=dict(target="set",
+                                                           type_command="player",
+                                                           command="shutdown",
+                                                           param=currentId)).json()
+
+            if result.get('result'):
+                self.showInfo(self.config.get('LOCALE', 'playerShutDown'))
+
+        except Exception as e:
+            print(e.__class__)
+            self.showWarning(self.config.get('LOCALE', 'hostError'))
+
 
     def updateController(self):
         """
@@ -967,7 +994,14 @@ class MainWindow(QtWidgets.QMainWindow):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setText(message)
-        msg.setWindowTitle("Error")
+        msg.setWindowTitle(self.config.get('LOCALE', 'warningTitle'))
+        msg.exec_()
+
+    def showInfo(self, message: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText(message)
+        msg.setWindowTitle(self.config.get('LOCALE', 'infoTitle'))
         msg.exec_()
 
     @staticmethod
