@@ -864,6 +864,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if reply == QMessageBox.Yes:
                 self.clearCommandTableData()
+            else:
+                return
 
         configDataclass = self.createGameParams()
 
