@@ -211,52 +211,59 @@ def objectFromDict(dictionary, outputClass):
     return outputClass(**dictionary)
 
 
-def updateStateTable(dataclass, table: QTableWidget):
+def updateStateTable(parent, dataclass, data):
     """
     Updates states table in GameController tab.
+    :param parent: MainWindow
     :param dataclass: ServerState or PlayerItem dataclass
-    :param table: QTableWidget
     :return: None
     """
     if dataclass.__class__ == ServerState:
-        table.insertRow(0) if table.rowCount() == 0 else None
-        items = [QTableWidgetItem(dataclass.version),
-                 QTableWidgetItem(dataclass.state),
-                 QTableWidgetItem(dataclass.gameTime)]
+        parent.infoTable.insertRow(0) if parent.infoTable.rowCount() == 0 else None
+
+        data = json.loads(data)
+        items = [QTableWidgetItem(data.get('version')),
+                 QTableWidgetItem(data.get('state')),
+                 QTableWidgetItem(data.get('gameTime'))]
         for item in items:
             item.setTextAlignment(QtCore.Qt.AlignCenter)
-            table.setItem(0, items.index(item), item)
+            parent.infoTable.setItem(0, items.index(item), item)
 
     if dataclass.__class__ == PlayerItem:
-        currentRow = table.rowCount()
-        table.insertRow(currentRow)
+        for player in data:
+            currentRow = parent.commandTable.rowCount()
+            parent.commandTable.insertRow(currentRow)
 
-        checkBoxWidget = QWidget()
-        blockCheckBox = QCheckBox()
-        layout = QHBoxLayout(checkBoxWidget)
-        layout.addWidget(blockCheckBox)
-        layout.setAlignment(QtCore.Qt.AlignCenter)
-        layout.setContentsMargins(0, 0, 0, 0)
-        table.setCellWidget(currentRow, 0, checkBoxWidget)
+            checkBoxWidget = QWidget()
+            blockCheckBox = QCheckBox()
+            layout = QHBoxLayout(checkBoxWidget)
+            layout.addWidget(blockCheckBox)
+            layout.setAlignment(QtCore.Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            parent.commandTable.setCellWidget(currentRow, 0, checkBoxWidget)
 
-        buttonWidget = QWidget()
-        blockButton = QPushButton('Block')
-        layout = QHBoxLayout(buttonWidget)
-        layout.addWidget(blockButton)
-        layout.setAlignment(QtCore.Qt.AlignCenter)
-        layout.setContentsMargins(0, 0, 0, 0)
-        table.setCellWidget(currentRow, 1, buttonWidget)
+            blockCheckBox.clicked.connect(parent.blockPlayerAction)
 
-        items = [QTableWidgetItem(str(dataclass.id)),
-                 QTableWidgetItem(dataclass.command),
-                 QTableWidgetItem(dataclass.type),
-                 QTableWidgetItem(dataclass.state),
-                 QTableWidgetItem(str(dataclass.bullet)),
-                 QTableWidgetItem(str(dataclass.balls)),
-                 QTableWidgetItem(str(dataclass.cargo))]
-        for item in items:
-            item.setTextAlignment(QtCore.Qt.AlignCenter)
-            table.setItem(currentRow, items.index(item) + 2, item)
+            buttonWidget = QWidget()
+            blockButton = QPushButton('Block')
+            layout = QHBoxLayout(buttonWidget)
+            layout.addWidget(blockButton)
+            layout.setAlignment(QtCore.Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            parent.commandTable.setCellWidget(currentRow, 1, buttonWidget)
+
+            player = json.loads(player)
+            items = [QTableWidgetItem(str(player.get('id'))),
+                     QTableWidgetItem(player.get('command')),
+                     QTableWidgetItem(player.get('type')),
+                     QTableWidgetItem(player.get('state')),
+                     QTableWidgetItem(str(player.get('bullet'))),
+                     QTableWidgetItem(str(player.get('balls'))),
+                     QTableWidgetItem(str(player.get('cargo')))]
+
+            for item in items:
+                item.setTextAlignment(QtCore.Qt.AlignCenter)
+                parent.commandTable.setItem(currentRow, items.index(item) + 2, item)
 
         # block: bool = False
         # off: bool = False

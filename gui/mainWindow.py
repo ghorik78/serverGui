@@ -124,12 +124,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Vars for indexing
         self.totalCreated = dict()
-
-        # flags for item removing
-        self.isRobotSelected = False
-        self.isTeamSelected = False
-        self.isPlayerSelected = False
-        self.isObjectSelected = False
+        self.blockedPlayers = dict()
 
         # flags for file selecting
         self.isPolygonJsonSelected = False
@@ -686,9 +681,9 @@ class MainWindow(QtWidgets.QMainWindow):
             extension = filepath.split('/')[-1].split('.')[-1]
 
             if extension == 'polygon':
-                self.loadPolygonJSON(filepath)
+                self.importPolygonJSON(filepath)
             elif extension == 'robots':
-                self.loadRobotJSON(filepath)
+                self.importRobotJSON(filepath)
             elif extension == "players":
                 self.importTeamJSON(filepath)
             elif extension == "game":
@@ -698,7 +693,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception:
             pass
 
-    def loadPolygonJSON(self, filepath):
+    def importPolygonJSON(self, filepath):
         """
         Loads Polygon's dataclass from the JSON file.
         """
@@ -717,7 +712,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.updatePolygonPlots()
 
-    def loadRobotJSON(self, filepath):
+    def importRobotJSON(self, filepath):
         """
         Loads robot dataclass from the JSON file.
         """
@@ -807,12 +802,24 @@ class MainWindow(QtWidgets.QMainWindow):
         configDataclass = self.createGameParams()
 
         try:
-            self.session.post(f'{self.serverAddr}', params=dict(target='set',
-                                                                type_command='core',
-                                                                filename='game.game',
-                                                                command='save_json'),
-                              json=json.dumps(dataclasses.asdict(configDataclass), indent=2))
-        except requests.exceptions.MissingSchema or ConnectionError:
+            data = self.session.post(self.serverAddr, params=dict(target='set',
+                                                                       type_command='core',
+                                                                       filename='game.game',
+                                                                       command='create_game'),
+                                     json=json.dumps(dataclasses.asdict(configDataclass), indent=2))
+
+            data = data.json()
+
+            # Getting results from the server answer
+            # Do not use json.dumps()
+            # updateStateTable will use it automatically
+            serverState = data.get('state')
+            acceptedPlayers = data.get('acceptedPlayers')
+            updateStateTable(self, ServerState(), serverState)
+            updateStateTable(self, PlayerItem(), acceptedPlayers)
+
+
+        except Exception:
             self.showWarning(self.config.get('LOCALE', 'hostError'))
 
     def startGame(self):
@@ -844,6 +851,33 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                param=None))
         except requests.exceptions.MissingSchema or ConnectionError:
             self.showWarning(self.config.get('LOCALE', 'hostError'))
+
+    # Table actions
+    def blockPlayerAction(self):
+        for row in range(self.commandTable.rowCount()):
+            widget = self.commandTable.cellWidget(row, 0)
+            checkBox = widget.children()[1]
+
+            currentId = self.commandTable.item(row, 2).text()
+            currentState = self.blockedPlayers.get(currentId)
+            newState = checkBox.isChecked()
+
+            if currentState != newState:
+                try:
+                    if newState:
+                        self.session.post(self.serverAddr, params=dict(target="set",
+                                                                   type_command="player",
+                                                                   command="block_player",
+                                                                   param=currentId))
+                    else:
+                        self.session.post(self.serverAddr, params=dict(target="set",
+                                                                   type_command="player",
+                                                                   command="unblock_player",
+                                                                   param=currentId))
+                except Exception:
+                    self.showWarning(self.config.get('LOCALE', 'hostError'))
+
+            self.blockedPlayers.update({currentId: checkBox.isChecked()})
 
     def updateController(self):
         """
