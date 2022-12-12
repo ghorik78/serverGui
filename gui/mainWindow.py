@@ -81,7 +81,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.objectTree.itemClicked.connect(self.objectTreeItemClickTrigger)
 
         # Tables
-        #self.commandTable.itemClicked.connect(self.shutdownPlayerAction)
+        # self.commandTable.itemClicked.connect(self.shutdownPlayerAction)
 
         # Buttons
         self.createPolygonObjBttn.clicked.connect(self.createNewObject)
@@ -104,6 +104,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.startGameButton.clicked.connect(self.startGame)
         self.restartGameButton.clicked.connect(self.restartGame)
         self.stopGameButton.clicked.connect(self.stopGame)
+
+        self.visStartGameButton.clicked.connect(self.startGame)
+        self.visRestartGameButton.clicked.connect(self.restartGame)
+        self.visStopGameButton.clicked.connect(self.stopGame)
 
         # ComboBoxes
 
@@ -134,16 +138,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isRobotsJsonSelected = False
         self.isTeamsJsonSelected = False
 
-        # timers for plots
-        self.plotTimer = QtCore.QTimer()
-        self.plotTimer.setInterval(500)
-        self.plotTimer.timeout.connect(self.updatePlots)
-        # self.plotTimer.start()
+        self.isGameCreated = False
 
-        self.stateTimer = QtCore.QTimer()
-        self.stateTimer.setInterval(1000)
-        self.stateTimer.timeout.connect(self.updateState)
-        # self.stateTimer.start()
+        # timers for plots
+        self.updateStateTimer = QtCore.QTimer()
+        self.updatePlotsTimer = QtCore.QTimer()
 
         # Other variables
         self.filesSent = []
@@ -153,26 +152,52 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addContextMenus()
         self.updateController()
 
-    def updatePlots(self):
+    def updateVisualTabPlots(self):
+        """
+        Redraws all objects in the visualization tab.
+        :return: None
+        """
         self.graphicsScene.clear()
 
-        if self.externalTab.currentIndex() != 2:  # Do not do anything if the visualizing tab is hidden
+        if self.externalTab.currentIndex() != 4:  # Do not do anything if the visualizing tab is hidden
             return
 
         matplotlib.use("Qt5agg")
-        data = self.session.get('http://127.0.0.1:5000/update').json().get('ans')  # Get position of robots
+        data = self.session.get(self.serverAddr, params=dict(target='get',
+                                                             type_command='player',
+                                                             command='visualization')).json()  # Get position of robots
+
+        if not data.get('result'):
+            self.showWarning(self.config.get('LOCALE', 'positionError'))
+            self.updatePlotsTimer.stop()
+            return
 
         # Set up plots
         img = imread('images/robot.png')
         fig, ax = plt.subplots()
-        plt.ylim([-10, 110])
-        plt.xlim([-10, 110])
-        plt.grid(True)
+        coords = data.get('data')
 
-        # Plot
-        for i in range(len(data)):
+        plt.xlim(self.fieldWidthLimits)
+        plt.ylim(self.fieldHeightLimits)
+        plt.grid(True)
+        ax.set_aspect(1)
+
+        # Plot polygon objects
+        polygonRoot = self.objectTree.invisibleRootItem()
+        children = [polygonRoot.child(i) for i in range(polygonRoot.childCount())]
+        try:
+            for child in children:
+                role = removeDigitsFromStr(child.text(0))
+                position = listFromStr(child.child(getFieldIndex(child, 'position')).text(1))
+                ax.add_artist(createFigureByRole(self.currentLocale, role, position[0:2]))
+                self.updateFieldLimits()
+        except AttributeError:
+            pass
+
+        # Plot robots
+        for i in range(len(coords)):
             imgBox = OffsetImage(img, zoom=0.5)
-            ab = AnnotationBbox(imgBox, (data[i][0], data[i][1]), frameon=False)
+            ab = AnnotationBbox(imgBox, (coords[i][0], coords[i][1]), frameon=False)
             ax.add_artist(ab)
 
         canvas = FigureCanvas(fig)
@@ -608,6 +633,37 @@ class MainWindow(QtWidgets.QMainWindow):
         :return: None
         """
         self.serverAddr = f"http://{self.hostname}:{self.port}/"
+        self.updateInfoTable()
+        self.updateStateTimer.stop()
+        self.updateStateTimer.setInterval(1000)
+        self.updateStateTimer.timeout.connect(self.updateInfoTable)
+        self.updateStateTimer.start()
+
+        self.updateVisualTabPlots()
+        self.updatePlotsTimer.stop()
+        self.updatePlotsTimer.setInterval(1000)
+        self.updatePlotsTimer.timeout.connect(self.updateVisualTabPlots)
+        self.updatePlotsTimer.start()
+
+    def updateInfoTable(self):
+        """
+        Automatically updates infoTable with valid data received from the server.
+        :return: None
+        """
+        try:
+            data = self.session.post(self.serverAddr, params=dict(target="get",
+                                                                  type_command="core",
+                                                                  command="state")).json()
+
+            if data.get('result'):
+                updateStateTable(self, ServerState(), data.get('state'))
+            else:
+                self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
+                self.updateStateTimer.stop()
+
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
+            self.showWarning(self.config.get('LOCALE', 'hostError'))
+            self.updateStateTimer.stop()
 
     # Actions
     def createPolygonParams(self):
@@ -802,58 +858,103 @@ class MainWindow(QtWidgets.QMainWindow):
         if not self.isReadyToCreate():
             return
 
+        if self.isGameCreated:
+            reply = self.getReply(self.config.get('LOCALE', 'recreatingTitle'),
+                                  self.config.get('LOCALE', 'createGameAgain'))
+
+            if reply == QMessageBox.Yes:
+                self.clearCommandTableData()
+
         configDataclass = self.createGameParams()
 
         try:
             data = self.session.post(self.serverAddr, params=dict(target='set',
-                                                                       type_command='core',
-                                                                       filename='game.game',
-                                                                       command='create_game'),
+                                                                  type_command='core',
+                                                                  filename='game.game',
+                                                                  command='create_game'),
                                      json=json.dumps(dataclasses.asdict(configDataclass), indent=2))
 
             data = data.json()
 
-            # Getting results from the server answer
-            # Do not use json.dumps()
-            # updateStateTable will use it automatically
-            serverState = data.get('state')
-            acceptedPlayers = data.get('acceptedPlayers')
-            updateStateTable(self, ServerState(), serverState)
-            updateStateTable(self, PlayerItem(), acceptedPlayers)
+            if data.get('result'):
+                # Getting results from the server answer
+                # Do not use json.dumps()
+                # updateStateTable will use it automatically
+                serverState = data.get('state')
+                acceptedPlayers = data.get('acceptedPlayers')
+                updateStateTable(self, ServerState(), serverState)
+                updateStateTable(self, PlayerItem(), acceptedPlayers)
+                self.isGameCreated = True
+                self.updateController()
+            else:
+                self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
 
-
-        except Exception as e:
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.MissingSchema):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
-            print(str(e))
+        except (TypeError, AttributeError, KeyError):
+            self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
 
     def startGame(self):
-        """Sends game start request"""
+        """
+        Sends start game request to the server.
+        :return: None
+        """
         try:
-            self.session.get(f'{self.serverAddr}', params=dict(target="set",
-                                                               type_command="core",
-                                                               command="start_game",
-                                                               param=self.delayComboBox.currentText().split()[-1]))
-        except requests.exceptions.MissingSchema or ConnectionError:
+            delay = self.delayComboBox.currentText().split()[-1]
+            result = self.session.get(f'{self.serverAddr}', params=dict(target="set",
+                                                                        type_command="core",
+                                                                        command="start_game",
+                                                                        param=delay)).json()
+            if result.get('result'):
+                if int(delay):
+                    self.statusBar.showMessage(
+                        f"{self.config.get('LOCALE', 'gameWillBeStartedIn')} {delay} {self.config.get('LOCALE', 'seconds')}",
+                        5000)
+                else:
+                    self.statusBar.showMessage(self.config.get('LOCALE', 'gameWillBeStarted'), 5000)
+
+        except (requests.exceptions.MissingSchema,
+                requests.exceptions.ConnectionError):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
 
-    def restartGame(self):
-        """Sends game restart request"""
+    def restartGame(self) -> None:
+        """
+        Sends game reset request.
+        :return: None
+        """
         try:
-            self.session.get(f'{self.serverAddr}', params=dict(target="set",
-                                                               type_command="core",
-                                                               command="restart_game",
-                                                               param=None))
-        except requests.exceptions.MissingSchema or ConnectionError:
+            result = self.session.get(f'{self.serverAddr}', params=dict(target="set",
+                                                                        type_command="core",
+                                                                        command="reset_game",
+                                                                        param=None)).json()
+
+            if result.get('result'):
+                self.statusBar.showMessage(self.config.get('LOCALE', 'resetSuccessful'), 5000)
+            else:
+                self.showWarning(self.config.get('LOCALE', 'resetError'))
+
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
 
-    def stopGame(self):
-        """Sends game stop request"""
+    def stopGame(self) -> None:
+        """
+        Sends game stop request.
+        :return: None
+        """
         try:
-            self.session.get(f'{self.serverAddr}', params=dict(target="set",
-                                                               type_command="core",
-                                                               command="stop_game",
-                                                               param=None))
-        except requests.exceptions.MissingSchema or ConnectionError:
+            result = self.session.get(f'{self.serverAddr}', params=dict(target="set",
+                                                                        type_command="core",
+                                                                        command="stop_game",
+                                                                        param=None)).json()
+
+            if result.get('result'):
+                self.statusBar.showMessage(self.config.get('LOCALE', 'stopSuccessful'))
+            else:
+                self.showWarning(self.config.get('LOCALE', 'stopError'))
+
+        except (requests.exceptions.MissingSchema,
+                requests.exceptions.ConnectionError):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
 
     # Table actions
@@ -868,47 +969,56 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if (currentState != newState):
                 try:
-                    if newState: # if you want to block player
+                    if newState:  # if you want to block player
                         result = self.session.post(self.serverAddr, params=dict(target="set",
-                                                                   type_command="player",
-                                                                   command="block_player",
-                                                                   param=currentId)).json()
+                                                                                type_command="player",
+                                                                                command="block_player",
+                                                                                param=currentId)).json()
                         if result.get('result'):
                             self.showInfo(self.config.get('LOCALE', 'playerBlocked'))
 
-                    elif currentState is not None: # if you want to unblock player
+                    elif currentState is not None:  # if you want to unblock player
                         result = self.session.post(self.serverAddr, params=dict(target="set",
-                                                                   type_command="player",
-                                                                   command="unblock_player",
-                                                                   param=currentId)).json()
+                                                                                type_command="player",
+                                                                                command="unblock_player",
+                                                                                param=currentId)).json()
                         if result.get('result'):
                             self.showInfo(self.config.get('LOCALE', 'playerUnblocked'))
 
-                except Exception as e:
+                except requests.exceptions.ConnectionError:
                     self.showWarning(self.config.get('LOCALE', 'hostError'))
+                except (KeyError, AttributeError, TypeError):
+                    self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
 
             self.blockedPlayers.update({currentId: checkBox.isChecked()})
 
     def shutdownPlayerAction(self, row):
+        """
+        Sends shutdown player request to the server.
+        :param row: int
+        :return: None
+        """
         currentId = self.commandTable.item(row, 2).text()
 
         try:
             result = self.session.post(self.serverAddr, params=dict(target="set",
-                                                           type_command="player",
-                                                           command="shutdown",
-                                                           param=currentId)).json()
+                                                                    type_command="player",
+                                                                    command="shutdown",
+                                                                    param=currentId)).json()
 
             if result.get('result'):
                 self.showInfo(self.config.get('LOCALE', 'playerShutDown'))
 
-        except Exception as e:
-            print(e.__class__)
+        except (requests.exceptions.MissingSchema,
+                requests.exceptions.ConnectionError):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
-
+        except (TypeError, AttributeError, KeyError):
+            self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
 
     def updateController(self):
         """
         Updates config buttons inside the GameController tab. Also updates status labels.
+        Game starting/restarting/stopping won't be allowed until all configs could be created.
         :return: None
         """
         objectsCount = self.objectTree.invisibleRootItem().childCount()
@@ -942,6 +1052,11 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.createGameBttn.setEnabled(True)
 
+        self.startGameButton.setEnabled(self.isGameCreated)
+        self.restartGameButton.setEnabled(self.isGameCreated)
+        self.stopGameButton.setEnabled(self.isGameCreated)
+        self.delayComboBox.setEnabled(self.isGameCreated)
+
     def changeSocketSettings(self):
         self.socketWindow = SocketSettingsWindow(self)
         self.socketWindow.show()
@@ -963,6 +1078,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.isTeamSelected = False
         self.isPlayerSelected = False
+
+    def clearCommandTableData(self):
+        self.blockedPlayers = dict()
+        for i in range(self.commandTable.rowCount()):
+            self.commandTable.removeRow(0)
 
     def hideAllChildren(self, children):
         self.isPlayerSelected = False  # Don't allow removing players if player is hidden

@@ -21,16 +21,44 @@ def translateMainWindow(mainWindow: QMainWindow, language):
 
     mainWindow.setWindowTitle(parser.get('LOCALE', 'windowTitle'))
 
+    mainWindow.menuFile.setTitle(parser.get('LOCALE', 'fileMenuText'))
+    mainWindow.saveAsAct.setText(parser.get('LOCALE', 'saveAsLabel'))
+    mainWindow.saveGameAct.setText(parser.get('LOCALE', 'saveGameLabel'))
+    mainWindow.openCfgAct.setText(parser.get('LOCALE', 'openConfigLabel'))
     mainWindow.menuSettings.setTitle(parser.get('LOCALE', 'settingsMenuText'))
     mainWindow.menuLanguage.setTitle(parser.get('LOCALE', 'languageMenuText'))
     mainWindow.actionRussian.setText(parser.get('LOCALE', 'russianLabel'))
     mainWindow.actionEnglish.setText(parser.get('LOCALE', 'englishLabel'))
+    mainWindow.actionSocketSettings.setText(parser.get('LOCALE', 'socketSettingsLabel'))
 
     mainWindow.externalTab.setTabText(0, parser.get('LOCALE', 'exTabText0'))
     mainWindow.externalTab.setTabText(1, parser.get('LOCALE', 'exTabText1'))
     mainWindow.externalTab.setTabText(2, parser.get('LOCALE', 'exTabText2'))
     mainWindow.externalTab.setTabText(3, parser.get('LOCALE', 'exTabText3'))
     mainWindow.externalTab.setTabText(4, parser.get('LOCALE', 'exTabText4'))
+
+    mainWindow.createPolygonObjBttn.setText(parser.get('LOCALE', 'createNewObject'))
+    mainWindow.removeSelectedObjBttn.setText(parser.get('LOCALE', 'removeSelectedObject'))
+    mainWindow.removeAllObjBttn.setText(parser.get('LOCALE', 'removeAllObjects'))
+    mainWindow.createRobotBttn.setText(parser.get('LOCALE', 'createNewRobot'))
+    mainWindow.removeSelectedRobotsBttn.setText(parser.get('LOCALE', 'removeSelectedRobot'))
+    mainWindow.removeAllRobotsBttn.setText(parser.get('LOCALE', 'removeAllRobots'))
+    mainWindow.createTeamBttn.setText(parser.get('LOCALE', 'createNewTeam'))
+    mainWindow.removeSelectedTeamBttn.setText(parser.get('LOCALE', 'removeSelectedTeam'))
+    mainWindow.removeAllTeamsBttn.setText(parser.get('LOCALE', 'removeAllTeams'))
+    mainWindow.createPlayerBttn.setText(parser.get('LOCALE', 'createNewPlayer'))
+    mainWindow.removeSelectedPlayerBttn.setText(parser.get('LOCALE', 'removeSelectedPlayer'))
+    mainWindow.removeAllPlayersBttn.setText(parser.get('LOCALE', 'removeAllPlayers'))
+
+    mainWindow.controllerLabel.setText(parser.get('LOCALE', 'controllerLabel'))
+    mainWindow.polygonCfgBttn.setText(parser.get('LOCALE', 'polygonCfg'))
+    mainWindow.robotCfgBttn.setText(parser.get('LOCALE', 'robotsCfg'))
+    mainWindow.playerCfgBttn.setText(parser.get('LOCALE', 'playersCfg'))
+    mainWindow.createGameBttn.setText(parser.get('LOCALE', 'createGame'))
+
+    mainWindow.polygonLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
+    mainWindow.robotsLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
+    mainWindow.teamsLabel.setText(parser.get('LOCALE', 'jsonLabelNot'))
 
     mainWindow.objectTree.headerItem().setText(0, parser.get('LOCALE', 'polyColumn0'))
     mainWindow.objectTree.headerItem().setText(1, parser.get('LOCALE', 'valueTitle'))
@@ -65,7 +93,9 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.commandTable.horizontalHeaderItem(7).setText(parser.get('LOCALE', 'command7'))
     mainWindow.commandTable.horizontalHeaderItem(8).setText(parser.get('LOCALE', 'command8'))
 
-    #mainWindow.statusLabel.setText(parser.get('LOCALE', 'selectAction'))
+    mainWindow.visStartGameButton.setText(parser.get('LOCALE', 'startGame'))
+    mainWindow.visRestartGameButton.setText(parser.get('LOCALE', 'restartGame'))
+    mainWindow.visStopGameButton.setText(parser.get('LOCALE', 'stopGame'))
 
 
 

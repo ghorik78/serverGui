@@ -342,6 +342,18 @@ def getMaxLengthOfField(fieldList: list):
     return max([len(field) for field in fieldList])
 
 
+def getMinCoords(coordList: list) -> (float, float):
+    x = [coord[0] for coord in coordList]
+    y = [coord[1] for coord in coordList]
+    return min(x), min(y)
+
+
+def getMaxCoords(coordList: list) -> (float, float):
+    x = [coord[0] for coord in coordList]
+    y = [coord[1] for coord in coordList]
+    return max(x), max(y)
+
+
 def getFieldIndex(widget: QTreeWidgetItem, fieldName: str):
     """Finds field index in the widget starting from zero"""
     for i in range(widget.childCount()):

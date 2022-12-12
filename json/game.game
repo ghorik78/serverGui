@@ -28,7 +28,7 @@
       "title": "Start Place",
       "position": [
         1.0,
-        0.0,
+        10.0,
         0.0
       ],
       "ind_for_led_controller": 0,
@@ -39,7 +39,7 @@
     {
       "title": "Factory",
       "position": [
-        1.0,
+        10.0,
         -1.0,
         0.0
       ],

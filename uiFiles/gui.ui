@@ -23,7 +23,7 @@
       <item>
        <widget class="QTabWidget" name="externalTab">
         <property name="currentIndex">
-         <number>3</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
@@ -377,6 +377,9 @@
           <string>Team creating</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_22">
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
           <item row="0" column="1">
            <widget class="QFrame" name="horizontalFrame">
             <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -401,6 +404,9 @@
                 </sizepolicy>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_9">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -421,7 +427,7 @@
                     <verstretch>1</verstretch>
                    </sizepolicy>
                   </property>
-                  <layout class="QHBoxLayout" name="horizontalLayout_11">
+                  <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="0,0,0,0">
                    <property name="leftMargin">
                     <number>0</number>
                    </property>
@@ -432,7 +438,7 @@
                     <number>0</number>
                    </property>
                    <property name="bottomMargin">
-                    <number>0</number>
+                    <number>2</number>
                    </property>
                    <item>
                     <widget class="QPushButton" name="createTeamBttn">
@@ -566,6 +572,9 @@
                 </sizepolicy>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_11" stretch="0,0">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -597,7 +606,7 @@
                     <number>0</number>
                    </property>
                    <property name="bottomMargin">
-                    <number>0</number>
+                    <number>3</number>
                    </property>
                    <item>
                     <widget class="QPushButton" name="createPlayerBttn">
@@ -882,7 +891,7 @@
               <number>1</number>
              </property>
              <item alignment="Qt::AlignHCenter">
-              <widget class="QLabel" name="label">
+              <widget class="QLabel" name="controllerLabel">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                  <horstretch>1</horstretch>
@@ -1078,6 +1087,18 @@
              <string notr="true">border: 5px solid grey;</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_11">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
              <item row="0" column="0">
               <widget class="QGraphicsView" name="graphicsView">
                <property name="styleSheet">
@@ -1110,7 +1131,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="visStartGameButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -1129,7 +1150,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_3">
+              <widget class="QPushButton" name="visRestartGameButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -1148,7 +1169,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="visStopGameButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                  <horstretch>0</horstretch>
