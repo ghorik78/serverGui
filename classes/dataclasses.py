@@ -76,14 +76,28 @@ class ServerState:
     gameTime: str = '00:00:00'
 
 
+# @dataclasses.dataclass
+# class PlayerItem:
+#     block: bool = False
+#     off: bool = False
+#     id: int = 0
+#     command: str = 'unknown'
+#     type: str = 'unknown'
+#     state: str = 'unknown'
+#     bullet: int = 0
+#     balls: int = 0
+#     cargo: bool = False
+#     position: typing.List[int] = (0, 0, 0)
+
+
 @dataclasses.dataclass
 class PlayerItem:
-    block: bool = False
-    off: bool = False
     id: int = 0
     command: str = 'unknown'
     type: str = 'unknown'
-    state: str = 'unknown'
+    state: bool = False
+    block: bool = False
     bullet: int = 0
     balls: int = 0
     cargo: bool = False
+    position: typing.List[int] = (0, 0, 0)

@@ -1,5 +1,5 @@
 from configparser import ConfigParser
-
+from classes.dataclasses import PlayerItem
 from PyQt5.QtWidgets import QMainWindow, QTableWidget, QLineEdit
 
 
@@ -83,23 +83,24 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.infoTable.horizontalHeaderItem(1).setText(parser.get('LOCALE', 'info1'))
     mainWindow.infoTable.horizontalHeaderItem(2).setText(parser.get('LOCALE', 'info2'))
 
-    mainWindow.commandTable.horizontalHeaderItem(0).setText(parser.get('LOCALE', 'command0'))
-    mainWindow.commandTable.horizontalHeaderItem(1).setText(parser.get('LOCALE', 'command1'))
-    mainWindow.commandTable.horizontalHeaderItem(2).setText(parser.get('LOCALE', 'command2'))
-    mainWindow.commandTable.horizontalHeaderItem(3).setText(parser.get('LOCALE', 'command3'))
-    mainWindow.commandTable.horizontalHeaderItem(4).setText(parser.get('LOCALE', 'command4'))
-    mainWindow.commandTable.horizontalHeaderItem(5).setText(parser.get('LOCALE', 'command5'))
-    mainWindow.commandTable.horizontalHeaderItem(6).setText(parser.get('LOCALE', 'command6'))
-    mainWindow.commandTable.horizontalHeaderItem(7).setText(parser.get('LOCALE', 'command7'))
-    mainWindow.commandTable.horizontalHeaderItem(8).setText(parser.get('LOCALE', 'command8'))
+    # mainWindow.commandTable.horizontalHeaderItem(0).setText(parser.get('LOCALE', 'command0'))
+    # mainWindow.commandTable.horizontalHeaderItem(1).setText(parser.get('LOCALE', 'command1'))
+    # mainWindow.commandTable.horizontalHeaderItem(2).setText(parser.get('LOCALE', 'command2'))
+    # mainWindow.commandTable.horizontalHeaderItem(3).setText(parser.get('LOCALE', 'command3'))
+    # mainWindow.commandTable.horizontalHeaderItem(4).setText(parser.get('LOCALE', 'command4'))
+    # mainWindow.commandTable.horizontalHeaderItem(5).setText(parser.get('LOCALE', 'command5'))
+    # mainWindow.commandTable.horizontalHeaderItem(6).setText(parser.get('LOCALE', 'command6'))
+    # mainWindow.commandTable.horizontalHeaderItem(7).setText(parser.get('LOCALE', 'command7'))
+    # mainWindow.commandTable.horizontalHeaderItem(8).setText(parser.get('LOCALE', 'command8'))
 
     mainWindow.visStartGameButton.setText(parser.get('LOCALE', 'startGame'))
     mainWindow.visRestartGameButton.setText(parser.get('LOCALE', 'restartGame'))
     mainWindow.visStopGameButton.setText(parser.get('LOCALE', 'stopGame'))
 
     # Changing text on each button in off column
+    buttonColumnIndex = len(list(PlayerItem().__dict__.keys())) - 1
     for row in range(mainWindow.commandTable.rowCount()):
-        mainWindow.commandTable.cellWidget(row, 1).children()[1].setText(parser.get('LOCALE', 'turnOff'))
+        mainWindow.commandTable.cellWidget(row, buttonColumnIndex).children()[1].setText(parser.get('LOCALE', 'off'))
 
 
 

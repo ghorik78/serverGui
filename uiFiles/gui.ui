@@ -1064,7 +1064,7 @@
                 </widget>
                </item>
                <item row="3" column="0">
-                <widget class="QPushButton" name="turnOffAllButton">
+                <widget class="QPushButton" name="shutdownAllButton">
                  <property name="text">
                   <string>Turn off all</string>
                  </property>

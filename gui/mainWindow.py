@@ -104,6 +104,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.startGameButton.clicked.connect(self.startGame)
         self.restartGameButton.clicked.connect(self.restartGame)
         self.stopGameButton.clicked.connect(self.stopGame)
+        self.shutdownAllButton.clicked.connect(self.turnOffAll)
 
         self.visStartGameButton.clicked.connect(self.startGame)
         self.visRestartGameButton.clicked.connect(self.restartGame)
@@ -137,6 +138,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # timers for plots
         self.updateStateTimer = QtCore.QTimer()
         self.updatePlotsTimer = QtCore.QTimer()
+        self.updateTableTimer = QtCore.QTimer()
 
         # Client-server
         self.hostname = ''
@@ -156,6 +158,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.translateToEN()
         self.addContextMenus()
         self.updateController()
+
+        self.prepareCommandTableHeader()
 
     def updateVisualTabPlots(self):
         """
@@ -266,6 +270,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.objectTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.objectTree.customContextMenuRequested.connect(self.objectTreeContextMenu)
+
+    def prepareCommandTableHeader(self):
+        keyList = list(PlayerItem().__dict__.keys())
+        self.commandTable.setColumnCount(len(keyList))
+
+        for key in keyList:
+            self.commandTable.horizontalHeaderItem(keyList.index(key)).setText(key)
+
+        self.commandTable.horizontalHeaderItem(len(keyList) - 1).setText(self.config.get('LOCALE', 'off'))
 
     def showRobotTreeContextMenu(self, position):
         menu, createAction, removeAction = callTreeContextMenu('Create new robot', 'Remove robot', self.robotTree,
@@ -669,10 +682,20 @@ class MainWindow(QtWidgets.QMainWindow):
             data = json.loads(data)
 
             if data.get('result'):
-                updateStateTable(self, ServerState(), data.get('state'))
+                updateStateTable(self, ServerState(), data.get('data'))
             else:
                 self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
                 self.updateStateTimer.stop()
+
+            data = self.session.post(self.serverAddr, params=dict(target="get",
+                                                                  type_command="player",
+                                                                  command="gui"),
+                                     json=open('json/game.game').read()).text
+
+            data = json.loads(data)
+
+            if data.get('result'):
+                updateStateTable(self, PlayerItem(), data.get('data'))
 
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
@@ -979,13 +1002,37 @@ class MainWindow(QtWidgets.QMainWindow):
             result = json.loads(result)
 
             if result.get('result'):
-                self.statusBar.showMessage(self.config.get('LOCALE', 'stopSuccessful'))
+                self.statusBar.showMessage(self.config.get('LOCALE', 'stopSuccessful'), 5000)
             else:
                 self.showWarning(self.config.get('LOCALE', 'stopError'))
 
         except (requests.exceptions.MissingSchema,
                 requests.exceptions.ConnectionError):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
+        except json.JSONDecodeError:
+            self.showWarning(self.config.get('LOCALE', 'decodeError'))
+
+    def turnOffAll(self) -> None:
+        reply = self.getReply(self.config.get('LOCALE', 'turnOffTitle'),
+                              self.config.get('LOCALE', 'turnOffAllText'))
+
+        if reply == QMessageBox.No:
+            return
+
+        try:
+            data = self.session.post(f'{self.serverAddr}', params=dict(target="set",
+                                                                       type_command="core",
+                                                                       command="shutdown_all",
+                                                                       param=None)).text
+
+            data = json.loads(data)
+
+            if data.get('result'):
+                self.statusBar.showMessage(self.config.get('LOCALE', 'shutDownSuccessfully'), 5000)
+
+        except (requests.exceptions.MissingSchema,
+                requests.exceptions.ConnectionError):
+            self.showWarning(self.config.get('LOCALE', 'incorrentAnswer'))
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
 
@@ -1011,7 +1058,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                         if result.get('result'):
                             self.statusBar.showMessage(
-                                f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerBlocked')}")
+                                f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerBlocked')}",
+                                5000)
 
                     elif currentState is not None:  # if you want to unblock player
                         result = self.session.post(self.serverAddr, params=dict(target="set",
@@ -1023,7 +1071,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                         if result.get('result'):
                             self.statusBar.showMessage(
-                                f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerUnblocked')}")
+                                f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerUnblocked')}",
+                                5000)
 
                 except requests.exceptions.ConnectionError:
                     self.showWarning(self.config.get('LOCALE', 'hostError'))
@@ -1050,7 +1099,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             if result.get('result'):
                 self.statusBar.showMessage(
-                    f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerShutDown')}")
+                    f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerShutDown')}", 5000)
 
         except (requests.exceptions.MissingSchema,
                 requests.exceptions.ConnectionError):
@@ -1098,6 +1147,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.startGameButton.setEnabled(self.isGameCreated)
         self.restartGameButton.setEnabled(self.isGameCreated)
         self.stopGameButton.setEnabled(self.isGameCreated)
+        self.shutdownAllButton.setEnabled(self.isGameCreated)
         self.delayComboBox.setEnabled(self.isGameCreated)
 
     def changeSocketSettings(self):

@@ -226,7 +226,6 @@ def updateStateTable(parent, dataclass, data):
 
         try:
             data = json.loads(data)
-
             items = [QTableWidgetItem(data.get('version')),
                      QTableWidgetItem(data.get('state')),
                      QTableWidgetItem(data.get('gameTime'))]
@@ -239,49 +238,50 @@ def updateStateTable(parent, dataclass, data):
             parent.showWarning(parent.config.get('LOCALE', 'incorrectAnswer'))
 
     if dataclass.__class__ == PlayerItem:
+        parent.clearCommandTableData()
         for player in data:
+            player = json.loads(player)
+
             currentRow = parent.commandTable.rowCount()
             parent.commandTable.insertRow(currentRow)
 
-            checkBoxWidget = QWidget()
-            blockCheckBox = QCheckBox()
-            layout = QHBoxLayout(checkBoxWidget)
-            layout.addWidget(blockCheckBox)
-            layout.setAlignment(QtCore.Qt.AlignCenter)
-            layout.setContentsMargins(0, 0, 0, 0)
-            parent.commandTable.setCellWidget(currentRow, 0, checkBoxWidget)
+            keyList = list(player.keys())[:len(player.keys())]
+            for key in keyList:
+                if key in TABLE_PLAYER_FIELD_WITH_COMBOBOX:
+                    checkBoxWidget, checkBox = createAlignedComboBox(player.get(key))
+                    checkBox.clicked.connect(parent.blockPlayerAction)
+                    parent.commandTable.setCellWidget(currentRow, keyList.index(key), checkBoxWidget)
 
-            blockCheckBox.clicked.connect(parent.blockPlayerAction)
+                else:
+                    item = QTableWidgetItem(str(player.get(key)))
+                    item.setTextAlignment(QtCore.Qt.AlignCenter)
+                    parent.commandTable.setItem(currentRow, keyList.index(key), item)
 
-            buttonWidget = QWidget()
-            blockButton = QPushButton(parent.config.get('LOCALE', 'turnOff'))
-            layout = QHBoxLayout(buttonWidget)
-            layout.addWidget(blockButton)
-            layout.setAlignment(QtCore.Qt.AlignCenter)
-            layout.setContentsMargins(0, 0, 0, 0)
-            parent.commandTable.setCellWidget(currentRow, 1, buttonWidget)
-
+            buttonWidget, blockButton = createAlignedButton(parent.config.get('LOCALE', 'off'))
+            parent.commandTable.setCellWidget(currentRow, len(keyList) - 1, buttonWidget)
             blockButton.clicked.connect(partial(parent.shutdownPlayerAction, currentRow))
 
-            player = json.loads(player)
 
-            items = []  # dict which contains each QTableWidgetItem with each PlayerItem field
-            for key in list(player.keys())[2:]:
-                items.append(QTableWidgetItem(str(player.get(key))))
+def createAlignedComboBox(defaultState):
+    checkBoxWidget = QWidget()
+    checkBox = QCheckBox()
+    checkBox.setChecked(defaultState)
+    layout = QHBoxLayout(checkBoxWidget)
+    layout.addWidget(checkBox)
+    layout.setAlignment(QtCore.Qt.AlignCenter)
+    layout.setContentsMargins(0, 0, 0, 0)
+    return checkBoxWidget, checkBox
 
-            for item in items:
-                item.setTextAlignment(QtCore.Qt.AlignCenter)
-                parent.commandTable.setItem(currentRow, items.index(item) + 2, item)
 
-        # block: bool = False
-        # off: bool = False
-        # id: int = 0
-        # command: str = 'unknown'
-        # type: str = 'unknown'
-        # state: str = 'unknown'
-        # bullet: int = 0
-        # balls: int = 0
-        # cargo: bool = False
+def createAlignedButton(text):
+    buttonWidget = QWidget()
+    button = QPushButton(text)
+    layout = QHBoxLayout(buttonWidget)
+    layout.addWidget(button)
+    layout.setAlignment(QtCore.Qt.AlignCenter)
+    layout.setContentsMargins(0, 0, 0, 0)
+    return buttonWidget, button
+
 
 
 def serializeChildren(childrenList: list, childClass):
