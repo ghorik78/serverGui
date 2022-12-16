@@ -891,7 +891,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                   command='create_game'),
                                      json=json.dumps(dataclasses.asdict(configDataclass), indent=2)).text
 
-            data = data.json()
+            data = json.loads(data)
 
             if data.get('result'):
                 # Getting results from the server answer
