@@ -32,7 +32,7 @@ def getPlayerAsserts(currentLocale: str):
 
 
 def getPathByAssert(currentLocale: str, role: str):
-    result = db.cursor().execute(f'SELECT imgPath FROM polygonRoles WHERE assert{currentLocale} = ?', (role,)).fetchone()
+    result = db.cursor().execute(f'SELECT imgPath FROM polygonRoles WHERE assertEN = ?', (role,)).fetchone()
     if result:
         return result[0]
 

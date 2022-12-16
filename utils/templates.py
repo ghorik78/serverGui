@@ -92,7 +92,7 @@ def dataclassFromWidget(widget: QTreeWidgetItem, outputClass, parentWidget: QTre
     for field in [widget.child(i) for i in range(widget.childCount())]:
         # Saves text of combo box widget
         if field.text(0) in OBJECT_CUSTOM_FIELDS + ROBOT_CUSTOM_FIELDS + PLAYER_CUSTOM_FIELDS:
-            obj.__dict__[field.text(0)] = parentWidget.itemWidget(widget.child(getFieldIndex(widget, field.text(0))),
+            obj.__dict__[field.text(0)] = parentWidget.itemWidget(widget.child(getQtFieldIndex(widget, field.text(0))),
                                                                   1).currentText()
 
         elif obj.__dict__.get(field.text(0)).__class__ == tuple:
@@ -225,7 +225,9 @@ def updateStateTable(parent, dataclass, data):
         parent.infoTable.insertRow(0) if parent.infoTable.rowCount() == 0 else None
 
         try:
-            data = json.loads(data)
+            if type(data) == str:
+                data = json.loads(data)
+
             items = [QTableWidgetItem(data.get('version')),
                      QTableWidgetItem(data.get('state')),
                      QTableWidgetItem(data.get('gameTime'))]
@@ -358,12 +360,27 @@ def getMaxCoords(coordList: list) -> (float, float):
     return max(x), max(y)
 
 
-def getFieldIndex(widget: QTreeWidgetItem, fieldName: str):
-    """Finds field index in the widget starting from zero"""
+def getQtFieldIndex(widget: QTreeWidgetItem, fieldName: str) -> int | None:
+    """
+    Finds field index in the widget starting from zero.
+    :param widget: QTreeWidgetItem (make sure that it is not your own class/type)
+    :param fieldName: str
+    :return: int if field found, None else
+    """
     for i in range(widget.childCount()):
         if widget.child(i).text(0) == fieldName:
             return i
     return None
+
+
+def getFieldIndex(object, fieldName: str) -> int | None:
+    """
+    Finds field index in your own class, also starting from zero.
+    :param object: any class, which can be shown as __dict__
+    :param fieldName: str - necessary field name
+    :return: int if field found, None else
+    """
+    return list(object.__dict__.keys()).index(fieldName)
 
 
 def saveToFile(filename, data):

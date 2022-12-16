@@ -138,7 +138,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # timers for plots
         self.updateStateTimer = QtCore.QTimer()
         self.updatePlotsTimer = QtCore.QTimer()
-        self.updateTableTimer = QtCore.QTimer()
+        self.updateCommandTableTimer = QtCore.QTimer()
 
         # Client-server
         self.hostname = ''
@@ -199,7 +199,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             for child in children:
                 role = removeDigitsFromStr(child.text(0))
-                position = listFromStr(child.child(getFieldIndex(child, 'position')).text(1))
+                position = listFromStr(child.child(getQtFieldIndex(child, 'position')).text(1))
                 ax.add_artist(createFigureByRole(self.currentLocale, role, position[0:2]))
                 self.updateFieldLimits()
         except AttributeError:
@@ -233,7 +233,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             for child in children:
                 role = removeDigitsFromStr(child.text(0))
-                position = listFromStr(child.child(getFieldIndex(child, 'position')).text(1))
+                position = listFromStr(child.child(getQtFieldIndex(child, 'position')).text(1))
                 ax.add_artist(createFigureByRole(self.currentLocale, role, position[0:2]))
                 self.updateFieldLimits()
         except AttributeError:
@@ -273,12 +273,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def prepareCommandTableHeader(self):
         keyList = list(PlayerItem().__dict__.keys())
+        keyList[-1] = "on/off"  # костыль, но рабочий.
         self.commandTable.setColumnCount(len(keyList))
+        self.commandTable.setHorizontalHeaderLabels([key for key in keyList])
+        print(self.commandTable.horizontalHeaderItem(0))
 
-        for key in keyList:
-            self.commandTable.horizontalHeaderItem(keyList.index(key)).setText(key)
+        #for key in keyList:
+            #self.commandTable.horizontalHeaderItem(keyList.index(key)).setText(key)
 
-        self.commandTable.horizontalHeaderItem(len(keyList) - 1).setText(self.config.get('LOCALE', 'off'))
+        #self.commandTable.horizontalHeaderItem(len(keyList) - 1).setText(self.config.get('LOCALE', 'off'))
 
     def showRobotTreeContextMenu(self, position):
         menu, createAction, removeAction = callTreeContextMenu('Create new robot', 'Remove robot', self.robotTree,
@@ -354,6 +357,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setUnselected(self.playerTree.selectedItems())
 
         if not self.teamTree.invisibleRootItem().childCount():
+            self.showWarning(self.config.get('LOCALE', 'noTeamsError'))
             return
 
         newPlayer = QTreeWidgetItem()
@@ -626,7 +630,7 @@ class MainWindow(QtWidgets.QMainWindow):
         children = [root.child(i) for i in range(root.childCount())]
 
         for child in children:
-            position = listFromStr(child.child(getFieldIndex(child, 'position')).text(1))
+            position = listFromStr(child.child(getQtFieldIndex(child, 'position')).text(1))
             actualPositions.append(position[0:2])
 
         for pos in self.objectsCoords:
@@ -687,10 +691,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
                 self.updateStateTimer.stop()
 
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
+            self.showWarning(self.config.get('LOCALE', 'hostError'))
+            self.updateStateTimer.stop()
+        except json.JSONDecodeError:
+            self.showWarning(self.config.get('LOCALE', 'decodeError'))
+
+    def updateCommandTable(self):
+        try:
             data = self.session.post(self.serverAddr, params=dict(target="get",
                                                                   type_command="player",
-                                                                  command="gui"),
-                                     json=open('json/game.game').read()).text
+                                                                  command="gui")).text
 
             data = json.loads(data)
 
@@ -699,9 +710,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
             self.showWarning(self.config.get('LOCALE', 'hostError'))
-            self.updateStateTimer.stop()
+            # todo
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
+            self.updateCommandTableTimer.stop()
 
     # Actions
     def createPolygonParams(self):
@@ -772,7 +784,13 @@ class MainWindow(QtWidgets.QMainWindow):
             configDataclass = self.createGameParams()
             saveToFile(outputPath, json.dumps(dataclasses.asdict(configDataclass), indent=2))
 
-    def importJSON(self):
+    def importJSON(self) -> None:
+        """
+        Imports selected by user JSON file and automatically calls tab-import methods.
+        For example, is selected file has .polygon extension, this method will call importPolygonJSON method.
+        If selected file has wrong extension, it will show warning with wrongExtension error.
+        :return: None
+        """
         filepath = getSelectedJson(self, 'Select file')
         try:
             extension = filepath.split('/')[-1].split('.')[-1]
@@ -785,7 +803,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.importTeamJSON(filepath)
             elif extension == "game":
                 self.importGameJSON(filepath)
-            else:
+            elif filepath:  # if no selected files
                 self.showWarning(self.config.get('LOCALE', 'wrongExtension'))
         except Exception:
             pass
@@ -882,7 +900,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusBar.showMessage(f'{self.config.get("LOCALE", "jsonLabel")} {filepath}', 10000)
 
     # Button controllers
-    def isReadyToCreate(self):
+    def isReadyToCreate(self) -> bool:
+        """
+        Returns game state. If it is ready to create, returns true. Else false.
+        :return: is game ready to be created (boolean)
+        """
         return self.objectTree.invisibleRootItem().childCount() and \
                self.robotTree.invisibleRootItem().childCount() and \
                self.teamTree.invisibleRootItem().childCount() and \
@@ -920,10 +942,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 # Getting results from the server answer
                 # Do not use json.dumps()
                 # updateStateTable will use it automatically
-                serverState = data.get('state')
-                acceptedPlayers = data.get('acceptedPlayers')
-                updateStateTable(self, ServerState(), serverState)
-                updateStateTable(self, PlayerItem(), acceptedPlayers)
                 self.isGameCreated = True
                 self.updateController()
             else:
@@ -936,6 +954,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
+
+        self.updateCommandTableTimer.stop()
+        self.updateCommandTableTimer.setInterval(1000)
+        self.updateCommandTableTimer.timeout.connect(self.updateCommandTable)
+        self.updateCommandTableTimer.start()
 
     def startGame(self):
         """
@@ -1039,14 +1062,14 @@ class MainWindow(QtWidgets.QMainWindow):
     # Table actions
     def blockPlayerAction(self):
         for row in range(self.commandTable.rowCount()):
-            widget = self.commandTable.cellWidget(row, 0)
+            widget = self.commandTable.cellWidget(row, getFieldIndex(PlayerItem(), 'block'))
             checkBox = widget.children()[1]
 
-            currentId = self.commandTable.item(row, 2).text()
+            currentId = self.commandTable.item(row, getFieldIndex(PlayerItem(), 'id')).text()
             currentState = self.blockedPlayers.get(currentId)
             newState = checkBox.isChecked()
 
-            if (currentState != newState):
+            if currentState != newState:
                 try:
                     if newState:  # if you want to block player
                         result = self.session.post(self.serverAddr, params=dict(target="set",
@@ -1087,7 +1110,7 @@ class MainWindow(QtWidgets.QMainWindow):
         :param row: int
         :return: None
         """
-        currentId = self.commandTable.item(row, 2).text()
+        currentId = self.commandTable.item(row, getFieldIndex(PlayerItem(), 'id')).text()
 
         try:
             result = self.session.post(self.serverAddr, params=dict(target="set",

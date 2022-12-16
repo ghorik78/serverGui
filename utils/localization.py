@@ -73,6 +73,7 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.startGameButton.setText(parser.get('LOCALE', 'startGame'))
     mainWindow.restartGameButton.setText(parser.get('LOCALE', 'restartGame'))
     mainWindow.stopGameButton.setText(parser.get('LOCALE', 'stopGame'))
+    mainWindow.shutdownAllButton.setText(parser.get('LOCALE', 'shutdownAll'))
 
     mainWindow.delayComboBox.setItemText(0, parser.get('LOCALE', 'delay0'))
     mainWindow.delayComboBox.setItemText(1, parser.get('LOCALE', 'delay1'))

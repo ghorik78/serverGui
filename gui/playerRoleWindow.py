@@ -30,7 +30,7 @@ class PlayerRoleWindow(QDialog):
     def submit(self):
         newPlayer = self.mainUi.playerTree.selectedItems()[0]
         selectedRole = self.rolesComboBox.currentText()
-        newPlayer.child(getFieldIndex(newPlayer, 'role_obj')).setText(1, str(selectedRole))
+        newPlayer.child(getQtFieldIndex(newPlayer, 'role_obj')).setText(1, str(selectedRole))
         self.mainUi.updateController()
         self.mainUi.setUnselected(self.mainUi.playerTree.selectedItems())
         self.close()
