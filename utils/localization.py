@@ -97,5 +97,9 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.visRestartGameButton.setText(parser.get('LOCALE', 'restartGame'))
     mainWindow.visStopGameButton.setText(parser.get('LOCALE', 'stopGame'))
 
+    # Changing text on each button in off column
+    for row in range(mainWindow.commandTable.rowCount()):
+        mainWindow.commandTable.cellWidget(row, 1).children()[1].setText(parser.get('LOCALE', 'turnOff'))
+
 
 

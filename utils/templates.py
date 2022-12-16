@@ -1,4 +1,5 @@
 import configparser
+import dataclasses
 import json
 import random
 import typing
@@ -207,10 +208,10 @@ def fillGameTree(game: Teams, teamTree: QTreeWidget, playerTree: QTreeWidget):
 # Returns serialized from dictionary object
 def objectFromDict(dictionary, outputClass):
     """
-    Return serialized from dictionary object
+    Returns serialized from dictionary object.
+    :return: Object of outputClass
     """
     return outputClass(**dictionary)
-
 
 
 def updateStateTable(parent, dataclass, data):
@@ -247,7 +248,7 @@ def updateStateTable(parent, dataclass, data):
             blockCheckBox.clicked.connect(parent.blockPlayerAction)
 
             buttonWidget = QWidget()
-            blockButton = QPushButton('Block')
+            blockButton = QPushButton(parent.config.get('LOCALE', 'turnOff'))
             layout = QHBoxLayout(buttonWidget)
             layout.addWidget(blockButton)
             layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -257,13 +258,10 @@ def updateStateTable(parent, dataclass, data):
             blockButton.clicked.connect(partial(parent.shutdownPlayerAction, currentRow))
 
             player = json.loads(player)
-            items = [QTableWidgetItem(str(player.get('id'))),
-                     QTableWidgetItem(player.get('command')),
-                     QTableWidgetItem(player.get('type')),
-                     QTableWidgetItem(player.get('state')),
-                     QTableWidgetItem(str(player.get('bullet'))),
-                     QTableWidgetItem(str(player.get('balls'))),
-                     QTableWidgetItem(str(player.get('cargo')))]
+
+            items = []  # dict which contains each QTableWidgetItem with each PlayerItem field
+            for key in list(player.keys())[2:]:
+                items.append(QTableWidgetItem(str(player.get(key))))
 
             for item in items:
                 item.setTextAlignment(QtCore.Qt.AlignCenter)

@@ -7,15 +7,23 @@ from PyQt5.QtWidgets import QWidget, QPushButton, QTreeWidget, QTreeWidgetItem, 
 
 
 class SocketSettingsWindow(QWidget):
-    def __init__(self, mainUi):
+    def __init__(self, mainUi, currentHostname, currentPort):
         super(SocketSettingsWindow, self).__init__()
         uic.loadUi('uiFiles/socket.ui', self)
         self.mainUi = mainUi
+
+        self.currentHostname = currentHostname
+        self.currentPort = currentPort
+
         self.onInit()
 
     def onInit(self):
         self.submitButton.clicked.connect(self.submit)
         self.setWindowTitle(self.mainUi.config.get('LOCALE', 'socketSettings'))
+
+        if (self.currentHostname != '') and (self.currentPort != ''):
+            self.hostnameLineEdit.setText(self.currentHostname)
+            self.portLineEdit.setText(self.currentPort)
 
     def submit(self):
         hostname = self.hostnameLineEdit.text()

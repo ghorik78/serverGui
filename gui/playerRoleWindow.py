@@ -2,7 +2,7 @@ import configparser
 
 from utils.templates import *
 
-from PyQt5 import uic
+from PyQt5 import uic, QtGui
 from PyQt5.QtWidgets import QWidget, QPushButton, QTreeWidget, QTreeWidgetItem, QDialog
 
 
@@ -23,11 +23,16 @@ class PlayerRoleWindow(QDialog):
         self.setWindowTitle(self.config.get('LOCALE', 'selectRole'))
         fillComboBoxByRoles(self.mainUi.playerRolesDict, self.rolesComboBox)
 
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        newPlayer = self.mainUi.playerTree.selectedItems()[0] if len(self.mainUi.playerTree.selectedItems()) else None
+        self.mainUi.playerTree.invisibleRootItem().removeChild(newPlayer)
+
     def submit(self):
-        newObject = self.mainUi.playerTree.selectedItems()[0]
+        newPlayer = self.mainUi.playerTree.selectedItems()[0]
         selectedRole = self.rolesComboBox.currentText()
-        newObject.child(getFieldIndex(newObject, 'role_obj')).setText(1, str(selectedRole))
+        newPlayer.child(getFieldIndex(newPlayer, 'role_obj')).setText(1, str(selectedRole))
         self.mainUi.updateController()
+        self.mainUi.setUnselected(self.mainUi.playerTree.selectedItems())
         self.close()
 
 
