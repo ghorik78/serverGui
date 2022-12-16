@@ -10,14 +10,11 @@ class PolygonRoleWindow(QDialog):
     def __init__(self, mainUi):
         super(PolygonRoleWindow, self).__init__()
         uic.loadUi('uiFiles/polygonRole.ui', self)
-
         self.mainUi = mainUi
-
-        self.submitButton.clicked.connect(self.submit)
-
         self.onInit()
 
     def onInit(self):
+        self.submitButton.clicked.connect(self.submit)
         self.setWindowTitle(self.mainUi.config.get('LOCALE', 'selectRole'))
         fillComboBoxByRoles(self.mainUi.objectRolesDict, self.rolesComboBox)
 

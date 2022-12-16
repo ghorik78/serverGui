@@ -8,9 +8,11 @@ class RobotCreatingWindow(QDialog):
     def __init__(self, mainUi):
         super(RobotCreatingWindow, self).__init__()
         uic.loadUi('uiFiles/robotList.ui', self)
-
         self.mainUi = mainUi
+        self.onInit()
 
+    def onInit(self):
+        self.setWindowTitle(self.mainUi.config.get('LOCALE', 'selectRole'))
         self.submitButton.clicked.connect(self.submit)
         self.prepareRobotList()
 

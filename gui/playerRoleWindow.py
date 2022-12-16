@@ -10,16 +10,13 @@ class PlayerRoleWindow(QDialog):
     def __init__(self, mainUi):
         super(PlayerRoleWindow, self).__init__()
         uic.loadUi('uiFiles/playerRole.ui', self)
-
         self.mainUi = mainUi
-
-        self.submitButton.clicked.connect(self.submit)
-
         self.onInit()
 
     def onInit(self):
         self.config = configparser.ConfigParser()
         self.config.read(f'locales/{self.mainUi.currentLocale}.ini')
+        self.submitButton.clicked.connect(self.submit)
         self.setWindowTitle(self.config.get('LOCALE', 'selectRole'))
         fillComboBoxByRoles(self.mainUi.playerRolesDict, self.rolesComboBox)
 

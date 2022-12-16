@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>298</width>
-    <height>95</height>
+    <width>219</width>
+    <height>72</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,6 +20,18 @@
       <string notr="true">qproperty-alignment: AlignCenter;</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QComboBox" name="rolesComboBox">
         <property name="minimumSize">

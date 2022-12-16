@@ -51,12 +51,12 @@ class MainWindow(QtWidgets.QMainWindow):
         This method will initialize all mainWindow children.
         EN locale will be set as default.
         """
-        # localization
+        # Localization
         self.currentLocale = 'EN'
         self.config = configparser.ConfigParser()
         self.config.read(f'locales/{self.currentLocale}.ini', encoding='utf-8')
 
-        # Roles
+        # Roles dicts
         self.objectRolesDict = createObjectRolesDict(self.currentLocale)
         self.playerRolesDict = createPlayerRolesDict(self.currentLocale)
 
@@ -135,6 +135,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.isGameCreated = False
 
+        # flags for context menu
+        self.isObjectSelected = False
+        self.isRobotSelected = False
+        self.isTeamSelected = False
+        self.isPlayerSelected = False
+
         # timers for plots
         self.updateStateTimer = QtCore.QTimer()
         self.updatePlotsTimer = QtCore.QTimer()
@@ -164,6 +170,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateVisualTabPlots(self):
         """
         Redraws all objects in the visualization tab.
+        Also sends request to the server to receive players coords.
         :return: None
         """
         self.graphicsScene.clear()
@@ -188,6 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
         fig, ax = plt.subplots()
         coords = data.get('data')
 
+        self.updateFieldLimits()
         plt.xlim(self.fieldWidthLimits)
         plt.ylim(self.fieldHeightLimits)
         plt.grid(True)
@@ -248,16 +256,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.polygonGraphicsScene.addWidget(canvas)
 
-    def updateState(self):
-        if self.externalTab.currentIndex() != 1:
-            return
-
-        data = self.session.get(f'{self.serverAddr}/server_control').json()
-        updateStateTable(self, objectFromDict(data, ServerState), self.infoTable)
-
-        data = self.session.get(f'{self.serverAddr}/data_player').json()
-        updateStateTable(self, objectFromDict(data, PlayerItem), self.commandTable)
-
     def addContextMenus(self):
         self.robotTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.robotTree.customContextMenuRequested.connect(self.showRobotTreeContextMenu)
@@ -276,14 +274,13 @@ class MainWindow(QtWidgets.QMainWindow):
         keyList[-1] = "on/off"  # костыль, но рабочий.
         self.commandTable.setColumnCount(len(keyList))
         self.commandTable.setHorizontalHeaderLabels([key for key in keyList])
-        print(self.commandTable.horizontalHeaderItem(0))
-
-        #for key in keyList:
-            #self.commandTable.horizontalHeaderItem(keyList.index(key)).setText(key)
-
-        #self.commandTable.horizontalHeaderItem(len(keyList) - 1).setText(self.config.get('LOCALE', 'off'))
 
     def showRobotTreeContextMenu(self, position):
+        """
+        Opens context menu when right-clicked to the robot's QTreeWidget.
+        :param position: will be given by QT core automatically
+        :return: None
+        """
         menu, createAction, removeAction = callTreeContextMenu('Create new robot', 'Remove robot', self.robotTree,
                                                                self.isRobotSelected)
         createAction.triggered.connect(self.createNewRobot)
@@ -291,6 +288,11 @@ class MainWindow(QtWidgets.QMainWindow):
         menu.exec_(self.robotTree.mapToGlobal(position))
 
     def showTeamTreeContextMenu(self, position):
+        """
+        Opens context menu when right-clicked to the team's QTreeWidget.
+        :param position: will be given by QT core automatically
+        :return: None
+        """
         menu, createAction, removeAction = callTreeContextMenu('Create new team', 'Remove team', self.playerTree,
                                                                self.isTeamSelected)
         createAction.triggered.connect(self.createNewTeam)
@@ -379,7 +381,10 @@ class MainWindow(QtWidgets.QMainWindow):
         newPlayer.setText(0, 'New player')
         newPlayer.setSelected(True)
 
-        playerList[self.currentTeamIndex].append(newPlayer)
+        try:
+            playerList[self.currentTeamIndex].append(newPlayer)
+        except IndexError:
+            self.showWarning(self.config.get('LOCALE', 'noTeamsError'))
 
         self.playerRolesWindow = PlayerRoleWindow(self)
         self.playerRolesWindow.exec_()
@@ -420,6 +425,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateController()
 
     def removeAllRobots(self):
+        if not self.robotTree.invisibleRootItem().childCount():
+            self.showWarning(self.config.get('LOCALE', 'noRobotsError'))
+            return
+
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
                               self.config.get('LOCALE', 'robotsRemoveText'))
 
@@ -461,6 +470,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateController()
 
     def removeAllTeams(self):
+        if not self.teamTree.invisibleRootItem().childCount():
+            self.showWarning(self.config.get('LOCALE', 'noTeamsError'))
+            return
+
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
                               self.config.get('LOCALE', 'teamsRemoveText'))
 
@@ -485,6 +498,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateController()
 
     def removeAllPlayers(self):
+        """
+        Removes all players from the selected team in reversed order (check the comments below).
+        Firstly, asks user for a reply (Yes or no).
+        Will show noTeamsError if no currently teams created.
+        :return: None
+        """
+        if not self.playerTree.invisibleRootItem().childCount():
+            self.showWarning(self.config.get('LOCALE', 'noPlayersError'))
+            return
+
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
                               self.config.get('LOCALE', 'playersRemoveText'))
 
@@ -496,7 +519,7 @@ class MainWindow(QtWidgets.QMainWindow):
         selectedTeamIdx = teamList.index(selectedTeam)
         children = playerList[selectedTeamIdx]
 
-        # [1, 2, 3, 3, 4] -> [1, 2, 3, 4] if you try to remove 3 in straight order
+        # [1, 2, 3, 3, 4] -> [1, 2, 3, 4] if you try to remove '3' in straight order
         for i in range(len(children) - 1, -1, -1):
             root.removeChild(children[i])
             playerList[selectedTeamIdx].remove(children[i])
@@ -504,14 +527,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateController()
 
     def removeAllPlayersReinterpret(self):
+        """
+        Removes all players without asking for a user reply.
+        :return: None
+        """
         root = self.playerTree.invisibleRootItem()
         children = [root.child(i) for i in range(root.childCount())]
         for child in children:
             root.removeChild(child)
-        playerList.clear()
+        playerList[self.currentTeamIndex].clear()
         self.updateController()
 
     def removeObject(self):
+        """
+        Removes selected polygon object from the object tree.
+        Automatically updates plots and controller.
+        :return:
+        """
         root = self.objectTree.invisibleRootItem()
         for item in self.objectTree.selectedItems():
             if not item.childCount():
@@ -523,6 +555,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateController()
 
     def removeAllObjects(self):
+        if not self.objectTree.invisibleRootItem().childCount():
+            self.showWarning(self.config.get('LOCALE', 'noObjectsError'))
+            return
+
         reply = self.getReply(self.config.get('LOCALE', 'removeTitle'),
                               self.config.get('LOCALE', 'objectsRemoveText'))
 
@@ -610,6 +646,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def posChanged(self, item, column):
         """
         Updates polygon plots when position field has changed. The column must be equal 1.
+        :param item: changed by user QTreeWidgetItem
+        :param column: int - number of column which has changed
+        :return: None
         """
         if column:
             text = removeSpacesFromStr(item.text(1))
@@ -644,10 +683,11 @@ class MainWindow(QtWidgets.QMainWindow):
         :param newPos: list
         :return: None
         """
-        newMinX = min([-abs(self.maxX * 0.25), abs(self.maxY * 0.25), self.minX * 1.25])
-        newMaxX = max([abs(self.maxY * 0.25), abs(self.minY * 0.25), abs(self.minX * 0.25), self.maxX * 1.25])
-        newMinY = min([-abs(self.maxY * 0.25), -abs(self.maxX * 0.25), self.minY * 1.25])
-        newMaxY = max(abs(self.maxX * 0.25), abs(self.minX * 0.25), self.maxY * 1.25)
+        SC = 0.35  # scale coefficient
+        newMinX = min([-abs(self.maxX * SC), -abs(self.maxY * SC), self.minX * (1 + SC)])
+        newMaxX = max([abs(self.maxY * SC), abs(self.minY * SC), abs(self.minX * SC), self.maxX * (1 + SC)])
+        newMinY = min([-abs(self.maxY * SC), -abs(self.maxX * SC), abs(self.minX * SC), self.minY * (1 + SC)])
+        newMaxY = max(abs(self.maxX * SC), abs(self.minX * SC), self.maxY * (1 + SC))
         self.fieldWidthLimits = [newMinX, newMaxX]
         self.fieldHeightLimits = [newMinY, newMaxY]
 
