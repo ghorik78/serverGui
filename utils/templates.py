@@ -224,13 +224,19 @@ def updateStateTable(parent, dataclass, data):
     if dataclass.__class__ == ServerState:
         parent.infoTable.insertRow(0) if parent.infoTable.rowCount() == 0 else None
 
-        data = json.loads(data)
-        items = [QTableWidgetItem(data.get('version')),
-                 QTableWidgetItem(data.get('state')),
-                 QTableWidgetItem(data.get('gameTime'))]
-        for item in items:
-            item.setTextAlignment(QtCore.Qt.AlignCenter)
-            parent.infoTable.setItem(0, items.index(item), item)
+        try:
+            data = json.loads(data)
+
+            items = [QTableWidgetItem(data.get('version')),
+                     QTableWidgetItem(data.get('state')),
+                     QTableWidgetItem(data.get('gameTime'))]
+
+            for item in items:
+                item.setTextAlignment(QtCore.Qt.AlignCenter)
+                parent.infoTable.setItem(0, items.index(item), item)
+
+        except json.JSONDecodeError:
+            parent.showWarning(parent.config.get('LOCALE', 'incorrectAnswer'))
 
     if dataclass.__class__ == PlayerItem:
         for player in data:
