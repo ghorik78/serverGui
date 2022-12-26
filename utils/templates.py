@@ -254,21 +254,25 @@ def updateStateTable(parent, dataclass, data):
 
             for key in keyList:
                 if key in TABLE_PLAYER_FIELD_WITH_COMBOBOX:
-                    checkBoxWidget, checkBox = createAlignedComboBox(player.get(key))
+                    checkBoxWidget, checkBox = createAlignedCheckBox(player.get(key))
                     checkBox.clicked.connect(parent.blockPlayerAction)
-                    parent.commandTable.setCellWidget(currentRow, keyList.index(key) + 1, checkBoxWidget)
+                    parent.commandTable.setCellWidget(currentRow, keyList.index(key) + 2, checkBoxWidget)
 
                 else:
                     item = QTableWidgetItem(str(player.get(key)))
                     item.setTextAlignment(QtCore.Qt.AlignCenter)
-                    parent.commandTable.setItem(currentRow, keyList.index(key) + 1, item)
+                    parent.commandTable.setItem(currentRow, keyList.index(key) + 2, item)
 
             buttonWidget, blockButton = createAlignedButton(parent.config.get('LOCALE', 'off'))
             parent.commandTable.setCellWidget(currentRow, 0, buttonWidget)
             blockButton.clicked.connect(partial(parent.shutdownPlayerAction, currentRow))
 
+            checkBoxWidget, repairCheckBox = createAlignedCheckBox(False)
+            parent.commandTable.setCellWidget(currentRow, 1, checkBoxWidget)
+            repairCheckBox.clicked.connect(parent.repairPlayerAction)
 
-def createAlignedComboBox(defaultState):
+
+def createAlignedCheckBox(defaultState):
     checkBoxWidget = QWidget()
     checkBox = QCheckBox()
     checkBox.setChecked(defaultState)

@@ -125,6 +125,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Vars for indexing
         self.totalCreated = dict()
         self.blockedPlayers = dict()
+        self.repairedPlayer = dict()
 
         # flags for file selecting
         self.isPolygonJsonSelected = False
@@ -140,12 +141,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.isPlayerSelected = False
 
         # timers for plots
+        self.stateDelay = 1000
+        self.tableDelay = 1000
+        self.plotsDelay = 100
+        self.reconnectDelay = 10000
+
         self.updateStateTimer = QtCore.QTimer()
         self.updatePlotsTimer = QtCore.QTimer()
         self.updateCommandTableTimer = QtCore.QTimer()
 
         self.reconnectTimer = QtCore.QTimer()
-        self.reconnectTimer.setInterval(10000)
+        self.reconnectTimer.setInterval(int(self.reconnectDelay))
         self.reconnectTimer.timeout.connect(self.tryToReconnect)
 
         # Client-server
@@ -283,8 +289,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.objectTree.customContextMenuRequested.connect(self.objectTreeContextMenu)
 
     def prepareCommandTableHeader(self):
-        keyList = [''] + list(DataPlayerForConsole().__dict__.keys())
+        keyList = ['', ''] + list(DataPlayerForConsole().__dict__.keys())
         keyList[0] = "on/off"  # костыль
+        keyList[1] = "repair"
         self.commandTable.setColumnCount(len(keyList))
         self.commandTable.setHorizontalHeaderLabels([key for key in keyList])
 
@@ -726,18 +733,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.hostname = self.settings.get('SETTINGS', 'hostname')
                 self.port = self.settings.get('SETTINGS', 'port')
             except configparser.NoSectionError:
-                self.statusBar.showMessage(self.config.get('LOCALE', 'hostError'), 5000)
+                pass
 
         self.serverAddr = f"http://{self.hostname}:{self.port}/"
         self.updateInfoTable()
         self.updateStateTimer.stop()
-        self.updateStateTimer.setInterval(1000)
+        self.updateStateTimer.setInterval(int(self.stateDelay))
         self.updateStateTimer.timeout.connect(self.updateInfoTable)
         self.updateStateTimer.start()
 
         self.updateVisualTabPlots()
         self.updatePlotsTimer.stop()
-        self.updatePlotsTimer.setInterval(1000)
+        self.updatePlotsTimer.setInterval(int(self.plotsDelay))
         self.updatePlotsTimer.timeout.connect(self.updateVisualTabPlots)
         self.updatePlotsTimer.start()
 
@@ -1047,7 +1054,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
 
         self.updateCommandTableTimer.stop()
-        self.updateCommandTableTimer.setInterval(1000)
+        self.updateCommandTableTimer.setInterval(int(self.tableDelay))
         self.updateCommandTableTimer.timeout.connect(self.updateCommandTable)
         self.updateCommandTableTimer.start()
 
@@ -1155,10 +1162,10 @@ class MainWindow(QtWidgets.QMainWindow):
     # Table actions
     def blockPlayerAction(self):
         for row in range(self.commandTable.rowCount()):
-            widget = self.commandTable.cellWidget(row, getFieldIndex(DataPlayerForConsole(), 'block') + 1)
+            widget = self.commandTable.cellWidget(row, getFieldIndex(DataPlayerForConsole(), 'block') + 2)
             checkBox = widget.children()[1]
 
-            currentId = self.commandTable.item(row, getFieldIndex(DataPlayerForConsole(), 'id') + 1).text()
+            currentId = self.commandTable.item(row, getFieldIndex(DataPlayerForConsole(), 'id') + 2).text()
             currentState = self.blockedPlayers.get(currentId)
             newState = checkBox.isChecked()
 
@@ -1197,13 +1204,57 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.blockedPlayers.update({currentId: checkBox.isChecked()})
 
+    def repairPlayerAction(self):
+        for row in range(self.commandTable.rowCount()):
+            widget = self.commandTable.cellWidget(row, 1)
+            checkBox = widget.children()[1]
+
+            currentId = self.commandTable.item(row, getFieldIndex(DataPlayerForConsole(), 'id') + 2).text()
+            currentState = self.repairedPlayer.get(currentId)
+            newState = checkBox.isChecked()
+
+            if currentState != newState:
+                try:
+                    if newState:
+                        result = self.session.post(self.serverAddr, params=dict(target="set",
+                                                                                type_command="player",
+                                                                                command="repair",
+                                                                                param=currentId)).text
+
+                        result = json.loads(result)
+
+                        if result.get('result'):
+                            self.statusBar.showMessage(
+                                f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerRepairing')}",
+                                5000)
+
+                    elif currentState is not None:  # if you want to set player as repaired
+                        result = self.session.post(self.serverAddr, params=dict(target="set",
+                                                                                type_command="player",
+                                                                                command="repaired",
+                                                                                param=currentId)).text
+
+                        result = json.loads(result)
+
+                        if result.get('result'):
+                            self.statusBar.showMessage(
+                                f"{self.config.get('LOCALE', 'player')} {currentId} {self.config.get('LOCALE', 'playerRepaired')}",
+                                5000)
+
+                except requests.exceptions.ConnectionError:
+                    self.handleConnectionError()
+                except (KeyError, AttributeError, TypeError):
+                    self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
+
+            self.repairedPlayer.update({currentId: checkBox.isChecked()})
+
     def shutdownPlayerAction(self, row):
         """
         Sends shutdown player request to the server.
         :param row: int
         :return: None
         """
-        currentId = self.commandTable.item(row, getFieldIndex(DataPlayerForConsole(), 'id') + 1).text()
+        currentId = self.commandTable.item(row, getFieldIndex(DataPlayerForConsole(), 'id') + 2).text()
 
         try:
             result = self.session.post(self.serverAddr, params=dict(target="set",
@@ -1267,7 +1318,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.delayComboBox.setEnabled(self.isGameCreated)
 
     def changeSocketSettings(self):
-        self.socketWindow = SocketSettingsWindow(self, self.hostname, self.port)
+        self.socketWindow = SocketSettingsWindow(self, self.hostname, self.port,
+                                                 self.stateDelay, self.tableDelay, self.plotsDelay, self.reconnectDelay)
         self.socketWindow.show()
 
     # Clear methods
@@ -1344,10 +1396,29 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.settings.set('SETTINGS', 'hostname', self.hostname)
             self.settings.set('SETTINGS', 'port', self.port)
+            self.settings.set('SETTINGS', 'stateDelay', str(self.stateDelay))
+            self.settings.set('SETTINGS', 'tableDelay', str(self.tableDelay))
+            self.settings.set('SETTINGS', 'plotsDelay', str(self.plotsDelay))
+            self.settings.set('SETTINGS', 'reconnectDelay', str(self.reconnectDelay))
             with open('settings.ini', 'w') as configfile:
                 self.settings.write(configfile)
         except configparser.NoSectionError:
             pass
+
+    def updateDelays(self, stateDelay, tableDelay, plotsDelay, reconnectDelay):
+        """
+        Updates intervals between requests.
+        :param stateDelay: int
+        :param tableDelay: int
+        :param plotsDelay: int
+        :param reconnectDelay: int
+        :return: None
+        """
+        self.stateDelay = stateDelay
+        self.tableDelay = tableDelay
+        self.plotsDelay = plotsDelay
+        self.reconnectDelay = reconnectDelay
+        self.updateSettings()
 
     @staticmethod
     def showAllChildren(children):

@@ -79,10 +79,10 @@ class ServerState:
 @dataclasses.dataclass
 class DataPlayerForConsole:
     id: str = ''
+    block: bool = False
     command: str = 'unknown'
     type: str = 'unknown'
     state: bool = False
-    block: bool = False
     bullet: int = 0
     balls: int = 0
     cargo: bool = False
