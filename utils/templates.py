@@ -240,7 +240,7 @@ def updateStateTable(parent, dataclass, data):
         except json.JSONDecodeError:
             parent.showWarning(parent.config.get('LOCALE', 'incorrectAnswer'))
 
-    if dataclass.__class__ == PlayerItem:
+    if dataclass.__class__ == DataPlayerForConsole:
         parent.clearCommandTableData()
         for player in data:
             if type(player) == str:
@@ -249,22 +249,22 @@ def updateStateTable(parent, dataclass, data):
             currentRow = parent.commandTable.rowCount()
             parent.commandTable.insertRow(currentRow)
 
-            dataclassObj = PlayerItem()  # object for field parsing
+            dataclassObj = DataPlayerForConsole()  # object for field parsing
             keyList = list(dataclassObj.__dict__.keys())
 
             for key in keyList:
                 if key in TABLE_PLAYER_FIELD_WITH_COMBOBOX:
                     checkBoxWidget, checkBox = createAlignedComboBox(player.get(key))
                     checkBox.clicked.connect(parent.blockPlayerAction)
-                    parent.commandTable.setCellWidget(currentRow, keyList.index(key), checkBoxWidget)
+                    parent.commandTable.setCellWidget(currentRow, keyList.index(key) + 1, checkBoxWidget)
 
                 else:
                     item = QTableWidgetItem(str(player.get(key)))
                     item.setTextAlignment(QtCore.Qt.AlignCenter)
-                    parent.commandTable.setItem(currentRow, keyList.index(key), item)
+                    parent.commandTable.setItem(currentRow, keyList.index(key) + 1, item)
 
             buttonWidget, blockButton = createAlignedButton(parent.config.get('LOCALE', 'off'))
-            parent.commandTable.setCellWidget(currentRow, len(keyList) - 1, buttonWidget)
+            parent.commandTable.setCellWidget(currentRow, 0, buttonWidget)
             blockButton.clicked.connect(partial(parent.shutdownPlayerAction, currentRow))
 
 
@@ -299,15 +299,15 @@ def serializeChildren(childrenList: list, childClass):
 
 def PlayerItemFromPlayerWidget(playerWidget: QTreeWidgetItem, playerId: int, command: str, ):
     """Return the dataclass object made from QTreeWidgetItem"""
-    return PlayerItem(block=False,
-                      off=False,
-                      id=playerId,
-                      command=command,
-                      type='unknown',
-                      state='unknown',
-                      bullet=random.randint(10, 100),
-                      balls=random.randint(10, 100),
-                      cargo=False)
+    return DataPlayerForConsole(block=False,
+                                off=False,
+                                id=playerId,
+                                command=command,
+                                type='unknown',
+                                state='unknown',
+                                bullet=random.randint(10, 100),
+                                balls=random.randint(10, 100),
+                                cargo=False)
 
 
 def readJSON(filepath: str) -> dict:

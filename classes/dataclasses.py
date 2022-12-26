@@ -77,7 +77,7 @@ class ServerState:
 
 
 @dataclasses.dataclass
-class PlayerItem:
+class DataPlayerForConsole:
     id: str = ''
     command: str = 'unknown'
     type: str = 'unknown'

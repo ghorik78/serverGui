@@ -1,5 +1,5 @@
 from configparser import ConfigParser
-from classes.dataclasses import PlayerItem
+from classes.dataclasses import DataPlayerForConsole
 from PyQt5.QtWidgets import QMainWindow, QTableWidget, QLineEdit
 
 
@@ -89,7 +89,7 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.visStopGameButton.setText(parser.get('LOCALE', 'stopGame'))
 
     # Changing text on each button in off column
-    buttonColumnIndex = len(list(PlayerItem().__dict__.keys())) - 1
+    buttonColumnIndex = 0
     for row in range(mainWindow.commandTable.rowCount()):
         mainWindow.commandTable.cellWidget(row, buttonColumnIndex).children()[1].setText(parser.get('LOCALE', 'off'))
 

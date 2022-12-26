@@ -283,8 +283,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.objectTree.customContextMenuRequested.connect(self.objectTreeContextMenu)
 
     def prepareCommandTableHeader(self):
-        keyList = list(PlayerItem().__dict__.keys())
-        keyList[-1] = "on/off"  # костыль
+        keyList = [''] + list(DataPlayerForConsole().__dict__.keys())
+        keyList[0] = "on/off"  # костыль
         self.commandTable.setColumnCount(len(keyList))
         self.commandTable.setHorizontalHeaderLabels([key for key in keyList])
 
@@ -773,7 +773,7 @@ class MainWindow(QtWidgets.QMainWindow):
             data = json.loads(data)
 
             if data.get('result'):
-                updateStateTable(self, PlayerItem(), data.get('data'))
+                updateStateTable(self, DataPlayerForConsole(), data.get('data'))
 
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
             self.handleConnectionError()
@@ -1155,10 +1155,10 @@ class MainWindow(QtWidgets.QMainWindow):
     # Table actions
     def blockPlayerAction(self):
         for row in range(self.commandTable.rowCount()):
-            widget = self.commandTable.cellWidget(row, getFieldIndex(PlayerItem(), 'block'))
+            widget = self.commandTable.cellWidget(row, getFieldIndex(DataPlayerForConsole(), 'block') + 1)
             checkBox = widget.children()[1]
 
-            currentId = self.commandTable.item(row, getFieldIndex(PlayerItem(), 'id')).text()
+            currentId = self.commandTable.item(row, getFieldIndex(DataPlayerForConsole(), 'id') + 1).text()
             currentState = self.blockedPlayers.get(currentId)
             newState = checkBox.isChecked()
 
@@ -1203,7 +1203,7 @@ class MainWindow(QtWidgets.QMainWindow):
         :param row: int
         :return: None
         """
-        currentId = self.commandTable.item(row, getFieldIndex(PlayerItem(), 'id')).text()
+        currentId = self.commandTable.item(row, getFieldIndex(DataPlayerForConsole(), 'id') + 1).text()
 
         try:
             result = self.session.post(self.serverAddr, params=dict(target="set",
