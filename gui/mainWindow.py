@@ -15,6 +15,7 @@ from gui.polygonRoleWindow import PolygonRoleWindow
 from gui.filterWindow import FilterWindow
 from gui.robotWindow import RobotWindow
 from gui.socketSettingsWindow import SocketSettingsWindow
+from gui.updater import Updater
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -28,6 +29,7 @@ from scipy import ndimage
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QTreeWidget, QPushButton, QTreeWidgetItem, QTabWidget, QGraphicsView, QGraphicsScene, \
     QGraphicsItem, QMessageBox, QLabel, QLineEdit
+from PyQt5.QtCore import QThreadPool, QThread, pyqtSignal
 
 import requests
 
@@ -143,8 +145,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # timers for plots
         self.stateDelay = 1000
         self.tableDelay = 1000
-        self.plotsDelay = 100
+        self.plotsDelay = 10
         self.reconnectDelay = 10000
+
+        self.threadPool = QThreadPool()
 
         self.updateStateTimer = QtCore.QTimer()
         self.updatePlotsTimer = QtCore.QTimer()
@@ -176,6 +180,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.prepareCommandTableHeader()
 
     def updateVisualTabPlots(self):
+        if self.externalTab.currentIndex() != 4:  # Do not do anything if the visualizing tab is hidden
+            return
+
+        self.th = Updater()
+        self.th.s.connect(self.updVis)
+        self.th.start()
+
+    def updVis(self):
         """
         Redraws all objects in the visualization tab.
         Also sends request to the server to receive players coords.
@@ -183,15 +195,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.graphicsScene.clear()
 
-        if self.externalTab.currentIndex() != 4:  # Do not do anything if the visualizing tab is hidden
-            return
-
         matplotlib.use("Qt5agg")
 
         try:
             data = self.session.get(self.serverAddr, params=dict(target='get',
-                                                                 type_command='player',
-                                                                 command='gui_vis')).text  # Get position of robots
+                                                                               type_command='player',
+                                                                               command='gui_vis')).text  # Get position of robots
 
             data = json.loads(data)
 
@@ -201,9 +210,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
             self.handleConnectionError()
+        except json.JSONDecodeError:
+            self.statusBar.showMessage(self.config.get('LOCALE', 'decodeError'), 5000)
 
         # Set up plots
-
         try:
             img = imread('images/robot.png')
             fig, ax = plt.subplots()
@@ -1313,8 +1323,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.createGameBttn.setEnabled(True)
 
         self.startGameButton.setEnabled(self.isGameCreated)
+        self.visStartGameButton.setEnabled(self.isGameCreated)
         self.restartGameButton.setEnabled(self.isGameCreated)
+        self.visRestartGameButton.setEnabled(self.isGameCreated)
         self.stopGameButton.setEnabled(self.isGameCreated)
+        self.visStopGameButton.setEnabled(self.isGameCreated)
         self.shutdownAllButton.setEnabled(self.isGameCreated)
         self.delayComboBox.setEnabled(self.isGameCreated)
 
