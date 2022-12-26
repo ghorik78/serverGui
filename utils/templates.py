@@ -243,7 +243,8 @@ def updateStateTable(parent, dataclass, data):
     if dataclass.__class__ == PlayerItem:
         parent.clearCommandTableData()
         for player in data:
-            player = json.loads(player)
+            if type(player) == str:
+                player = json.loads(player)
 
             currentRow = parent.commandTable.rowCount()
             parent.commandTable.insertRow(currentRow)

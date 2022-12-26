@@ -1191,7 +1191,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                 5000)
 
                 except requests.exceptions.ConnectionError:
-                    self.showWarning(self.config.get('LOCALE', 'hostError'))
+                    self.handleConnectionError()
                 except (KeyError, AttributeError, TypeError):
                     self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
 
@@ -1219,7 +1219,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         except (requests.exceptions.MissingSchema,
                 requests.exceptions.ConnectionError):
-            self.showWarning(self.config.get('LOCALE', 'hostError'))
+            self.handleConnectionError()
         except (TypeError, AttributeError, KeyError):
             self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
 

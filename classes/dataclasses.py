@@ -78,9 +78,9 @@ class ServerState:
 
 @dataclasses.dataclass
 class PlayerItem:
+    id: str = ''
     command: str = 'unknown'
     type: str = 'unknown'
-    id: int = 0
     state: bool = False
     block: bool = False
     bullet: int = 0
