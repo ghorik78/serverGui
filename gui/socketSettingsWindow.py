@@ -37,6 +37,7 @@ class SocketSettingsWindow(QWidget):
             self.mainUi.hostname = hostname
             self.mainUi.port = port
             self.mainUi.updateServerAddress()
+            self.mainUi.updateSettings()
             self.mainUi.statusBar.showMessage(self.mainUi.config.get('LOCALE', 'addressUpdatedSuccessfully'), 10000)
             self.close()
 

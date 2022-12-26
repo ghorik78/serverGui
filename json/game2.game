@@ -1,0 +1,41 @@
+{
+  "teams": [
+    {
+      "players": [
+        {
+          "title": "New player",
+          "robot": "",
+          "role_obj": "Defender",
+          "method_control_obj": ""
+        }
+      ],
+      "title": "New team",
+      "color_team": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "polygon": [
+    {
+      "title": "Factory",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ind_for_led_controller": 0,
+      "custom_settings": "",
+      "game_mechanics": 0,
+      "filter": ""
+    }
+  ],
+  "robots": [
+    {
+      "title": "pioneer1",
+      "ip": "127.0.0.1",
+      "port": 0
+    }
+  ]
+}

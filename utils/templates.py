@@ -48,6 +48,8 @@ def createFigureByRole(currentLocale: str, role: str, pos: tuple):
     return AnnotationBbox(img, pos, frameon=False)
 
 
+# METHODS FOR IMAGE PROCESSING
+
 def checkImage(path):
     img = Image.open(path)
     if img.size != (176, 176):
@@ -156,7 +158,6 @@ def fillComboBoxByRoles(rolesDict: dict, comboBox: QComboBox):
     comboBox.addItems(rolesDict.keys())
 
 
-# Fills tree from game dataclass
 def fillGameTree(game: Teams, teamTree: QTreeWidget, playerTree: QTreeWidget):
     """
     Fills the game tree by dataclass objects.
@@ -247,7 +248,9 @@ def updateStateTable(parent, dataclass, data):
             currentRow = parent.commandTable.rowCount()
             parent.commandTable.insertRow(currentRow)
 
-            keyList = list(player.keys())[:len(player.keys())]
+            dataclassObj = PlayerItem()  # object for field parsing
+            keyList = list(dataclassObj.__dict__.keys())
+
             for key in keyList:
                 if key in TABLE_PLAYER_FIELD_WITH_COMBOBOX:
                     checkBoxWidget, checkBox = createAlignedComboBox(player.get(key))
@@ -283,7 +286,6 @@ def createAlignedButton(text):
     layout.setAlignment(QtCore.Qt.AlignCenter)
     layout.setContentsMargins(0, 0, 0, 0)
     return buttonWidget, button
-
 
 
 def serializeChildren(childrenList: list, childClass):
@@ -404,4 +406,3 @@ def getMultipleSelectedJson(parent):
     window = QFileDialog(parent, 'Select all JSON files')
     window.setFileMode(QFileDialog.ExistingFiles)
     return window.getOpenFileNames()[0]
-

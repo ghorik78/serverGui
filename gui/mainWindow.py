@@ -110,8 +110,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.visRestartGameButton.clicked.connect(self.restartGame)
         self.visStopGameButton.clicked.connect(self.stopGame)
 
-        # ComboBoxes
-
         # Graphics
         self.objectsCoords = [[0.0, 0.0]]
         self.minX, self.maxX = 1.0, 1.0
@@ -146,6 +144,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updatePlotsTimer = QtCore.QTimer()
         self.updateCommandTableTimer = QtCore.QTimer()
 
+        self.reconnectTimer = QtCore.QTimer()
+        self.reconnectTimer.setInterval(10000)
+        self.reconnectTimer.timeout.connect(self.tryToReconnect)
+
         # Client-server
         self.hostname = ''
         self.port = ''
@@ -179,21 +181,29 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         matplotlib.use("Qt5agg")
-        data = self.session.get(self.serverAddr, params=dict(target='get',
-                                                             type_command='player',
-                                                             command='visualization')).text  # Get position of robots
 
-        data = json.loads(data)
+        try:
+            data = self.session.get(self.serverAddr, params=dict(target='get',
+                                                                 type_command='player',
+                                                                 command='visualization')).text  # Get position of robots
 
-        if not data.get('result'):
-            self.showWarning(self.config.get('LOCALE', 'positionError'))
-            self.updatePlotsTimer.stop()
-            return
+            data = json.loads(data)
+
+            if not data.get('result'):
+                self.showWarning(self.config.get('LOCALE', 'positionError'))
+                self.updatePlotsTimer.stop()
+                return
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
+            self.handleConnectionError()
 
         # Set up plots
-        img = imread('images/robot.png')
-        fig, ax = plt.subplots()
-        coords = data.get('data')
+
+        try:
+            img = imread('images/robot.png')
+            fig, ax = plt.subplots()
+            coords = data.get('data')
+        except UnboundLocalError:
+            return
 
         self.updateFieldLimits()
         plt.xlim(self.fieldWidthLimits)
@@ -207,9 +217,10 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             for child in children:
                 role = removeDigitsFromStr(child.text(0))
-                position = listFromStr(child.child(getQtFieldIndex(child, 'position')).text(1))
-                ax.add_artist(createFigureByRole(self.currentLocale, role, position[0:2]))
-                self.updateFieldLimits()
+                position = listFromStr(child.child(getQtFieldIndex(child, 'position')).text(1))[0:2]
+                ax.add_artist(createFigureByRole(self.currentLocale, role, position))
+                # self.updateFieldLimits()
+                # раскомментить строку выше, если сломалась визуализация
         except AttributeError:
             pass
 
@@ -218,6 +229,8 @@ class MainWindow(QtWidgets.QMainWindow):
             imgBox = OffsetImage(img, zoom=0.5)
             ab = AnnotationBbox(imgBox, (coords[i][0], coords[i][1]), frameon=False)
             ax.add_artist(ab)
+            self.updateLimitsAccordingToPosition(coords[i])
+            self.updateFieldLimits()
 
         canvas = FigureCanvas(fig)
         plt.close()  # Close for optimization
@@ -271,7 +284,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def prepareCommandTableHeader(self):
         keyList = list(PlayerItem().__dict__.keys())
-        keyList[-1] = "on/off"  # костыль, но рабочий.
+        keyList[-1] = "on/off"  # костыль
         self.commandTable.setColumnCount(len(keyList))
         self.commandTable.setHorizontalHeaderLabels([key for key in keyList])
 
@@ -691,14 +704,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.fieldWidthLimits = [newMinX, newMaxX]
         self.fieldHeightLimits = [newMinY, newMaxY]
 
+    def updateLimitsAccordingToPosition(self, position):
+        """
+        Updates min and max X and Y according to player position.
+        If player coords go beyond the existing limits, resizes visual tab graphics scene.
+        :param position:
+        :return:
+        """
+        self.minX = min(self.minX, position[0])
+        self.maxX = max(self.maxX, position[0])
+        self.minY = min(self.minY, position[1])
+        self.maxY = max(self.maxY, position[1])
+
     def updateServerAddress(self):
         """
         Updates server address.
         :return: None
         """
         if (self.hostname == '') or (self.port == ''):
-            self.hostname = self.settings.get('SETTINGS', 'hostname')
-            self.port = self.settings.get('SETTINGS', 'port')
+            try:
+                self.hostname = self.settings.get('SETTINGS', 'hostname')
+                self.port = self.settings.get('SETTINGS', 'port')
+            except configparser.NoSectionError:
+                self.statusBar.showMessage(self.config.get('LOCALE', 'hostError'), 5000)
 
         self.serverAddr = f"http://{self.hostname}:{self.port}/"
         self.updateInfoTable()
@@ -732,8 +760,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updateStateTimer.stop()
 
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
-            self.showWarning(self.config.get('LOCALE', 'hostError'))
-            self.updateStateTimer.stop()
+            self.handleConnectionError()
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
 
@@ -749,11 +776,36 @@ class MainWindow(QtWidgets.QMainWindow):
                 updateStateTable(self, PlayerItem(), data.get('data'))
 
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
-            self.showWarning(self.config.get('LOCALE', 'hostError'))
-            # todo
+            self.handleConnectionError()
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
             self.updateCommandTableTimer.stop()
+
+    def tryToReconnect(self):
+        """
+        Tries to receive answer from the server every 10 seconds.
+        If no answer received, does nothing.
+        If answer received successfully, shows a specified message in the status bar.
+        :return: None
+        """
+        try:
+            data = self.session.post(self.serverAddr, params=dict(target="get",
+                                                                  type_command="core",
+                                                                  command="state")).text
+
+            data = json.loads(data)
+
+            if data.get('result'):
+                updateStateTable(self, ServerState(), data.get('data'))
+                self.updateStateTimer.start()
+                self.updatePlotsTimer.start()
+                self.reconnectTimer.stop()
+                self.statusBar.showMessage(self.config.get('LOCALE', 'connectedSuccessfully'), 5000)
+            else:
+                self.statusBar.showMessage(self.config.get('LOCALE', 'incorrectAnswer'), 10000)
+
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
+            pass
 
     # Actions
     def createPolygonParams(self):
@@ -987,9 +1039,8 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
 
-        except (requests.exceptions.ConnectionError,
-                requests.exceptions.MissingSchema):
-            self.showWarning(self.config.get('LOCALE', 'hostError'))
+        except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema):
+            self.handleConnectionError()
         except (TypeError, AttributeError, KeyError):
             self.showWarning(self.config.get('LOCALE', 'incorrectAnswer'))
         except json.JSONDecodeError:
@@ -1024,7 +1075,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         except (requests.exceptions.MissingSchema,
                 requests.exceptions.ConnectionError):
-            self.showWarning(self.config.get('LOCALE', 'hostError'))
+            self.handleConnectionError()
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
 
@@ -1047,7 +1098,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.showWarning(self.config.get('LOCALE', 'resetError'))
 
         except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
-            self.showWarning(self.config.get('LOCALE', 'hostError'))
+            self.handleConnectionError()
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
 
@@ -1065,17 +1116,20 @@ class MainWindow(QtWidgets.QMainWindow):
             result = json.loads(result)
 
             if result.get('result'):
-                self.statusBar.showMessage(self.config.get('LOCALE', 'stopSuccessful'), 5000)
+                self.handleConnectionError()
             else:
                 self.showWarning(self.config.get('LOCALE', 'stopError'))
 
-        except (requests.exceptions.MissingSchema,
-                requests.exceptions.ConnectionError):
-            self.showWarning(self.config.get('LOCALE', 'hostError'))
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
+            self.handleConnectionError()
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
 
     def turnOffAll(self) -> None:
+        """
+        Sends shutdown all request.
+        :return: None
+        """
         reply = self.getReply(self.config.get('LOCALE', 'turnOffTitle'),
                               self.config.get('LOCALE', 'turnOffAllText'))
 
@@ -1093,9 +1147,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if data.get('result'):
                 self.statusBar.showMessage(self.config.get('LOCALE', 'shutDownSuccessfully'), 5000)
 
-        except (requests.exceptions.MissingSchema,
-                requests.exceptions.ConnectionError):
-            self.showWarning(self.config.get('LOCALE', 'incorrentAnswer'))
+        except (requests.exceptions.MissingSchema, requests.exceptions.ConnectionError):
+            self.handleConnectionError()
         except json.JSONDecodeError:
             self.showWarning(self.config.get('LOCALE', 'decodeError'))
 
@@ -1280,7 +1333,24 @@ class MainWindow(QtWidgets.QMainWindow):
         msg.setWindowTitle(self.config.get('LOCALE', 'infoTitle'))
         msg.exec_()
 
+    def handleConnectionError(self):
+        self.statusBar.showMessage(self.config.get('LOCALE', 'hostError'), 10000)
+        self.updateStateTimer.stop()
+        self.updatePlotsTimer.stop()
+        self.reconnectTimer.start()
+
+    # Setting actions
+    def updateSettings(self):
+        try:
+            self.settings.set('SETTINGS', 'hostname', self.hostname)
+            self.settings.set('SETTINGS', 'port', self.port)
+            with open('settings.ini', 'w') as configfile:
+                self.settings.write(configfile)
+        except configparser.NoSectionError:
+            pass
+
     @staticmethod
     def showAllChildren(children):
         for child in children:
             child.setHidden(False)
+

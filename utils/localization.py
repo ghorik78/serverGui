@@ -84,16 +84,6 @@ def translateMainWindow(mainWindow: QMainWindow, language):
     mainWindow.infoTable.horizontalHeaderItem(1).setText(parser.get('LOCALE', 'info1'))
     mainWindow.infoTable.horizontalHeaderItem(2).setText(parser.get('LOCALE', 'info2'))
 
-    # mainWindow.commandTable.horizontalHeaderItem(0).setText(parser.get('LOCALE', 'command0'))
-    # mainWindow.commandTable.horizontalHeaderItem(1).setText(parser.get('LOCALE', 'command1'))
-    # mainWindow.commandTable.horizontalHeaderItem(2).setText(parser.get('LOCALE', 'command2'))
-    # mainWindow.commandTable.horizontalHeaderItem(3).setText(parser.get('LOCALE', 'command3'))
-    # mainWindow.commandTable.horizontalHeaderItem(4).setText(parser.get('LOCALE', 'command4'))
-    # mainWindow.commandTable.horizontalHeaderItem(5).setText(parser.get('LOCALE', 'command5'))
-    # mainWindow.commandTable.horizontalHeaderItem(6).setText(parser.get('LOCALE', 'command6'))
-    # mainWindow.commandTable.horizontalHeaderItem(7).setText(parser.get('LOCALE', 'command7'))
-    # mainWindow.commandTable.horizontalHeaderItem(8).setText(parser.get('LOCALE', 'command8'))
-
     mainWindow.visStartGameButton.setText(parser.get('LOCALE', 'startGame'))
     mainWindow.visRestartGameButton.setText(parser.get('LOCALE', 'restartGame'))
     mainWindow.visStopGameButton.setText(parser.get('LOCALE', 'stopGame'))
