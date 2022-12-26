@@ -191,7 +191,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             data = self.session.get(self.serverAddr, params=dict(target='get',
                                                                  type_command='player',
-                                                                 command='gui_vis2')).text  # Get position of robots
+                                                                 command='gui_vis')).text  # Get position of robots
 
             data = json.loads(data)
 
