@@ -191,7 +191,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             data = self.session.get(self.serverAddr, params=dict(target='get',
                                                                  type_command='player',
-                                                                 command='visualization')).text  # Get position of robots
+                                                                 command='gui_vis2')).text  # Get position of robots
 
             data = json.loads(data)
 
@@ -207,7 +207,8 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             img = imread('images/robot.png')
             fig, ax = plt.subplots()
-            coords = data.get('data')
+            data = data.get('data')
+            playersCoords = [player.get('position')[0:2] for player in data.get('players')]
         except UnboundLocalError:
             return
 
@@ -231,11 +232,11 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
         # Plot robots
-        for i in range(len(coords)):
+        for i in range(len(playersCoords)):
             imgBox = OffsetImage(img, zoom=0.5)
-            ab = AnnotationBbox(imgBox, (coords[i][0], coords[i][1]), frameon=False)
+            ab = AnnotationBbox(imgBox, (playersCoords[i][0], playersCoords[i][1]), frameon=False)
             ax.add_artist(ab)
-            self.updateLimitsAccordingToPosition(coords[i])
+            self.updateLimitsAccordingToPosition(playersCoords[i])
             self.updateFieldLimits()
 
         canvas = FigureCanvas(fig)
@@ -1424,4 +1425,3 @@ class MainWindow(QtWidgets.QMainWindow):
     def showAllChildren(children):
         for child in children:
             child.setHidden(False)
-

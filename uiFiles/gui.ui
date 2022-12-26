@@ -23,7 +23,7 @@
       <item>
        <widget class="QTabWidget" name="externalTab">
         <property name="currentIndex">
-         <number>0</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
